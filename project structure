@@ -1,0 +1,14 @@
+/
+├── public/                 # Static assets (images, fonts, favicon)
+├── src/
+│   ├── components/         # Reusable UI elements (Tool Cards, Nav, Footer)
+│   ├── layouts/            # Global Layout.astro (Handles SEO, Canonical URLs, Schema)
+│   └── pages/              # File-based routing
+│       ├── index.astro                             # The Hub Homepage
+│       ├── paper-bag-die-line-generator.astro      # Interactive SVG Canvas Tool
+│       ├── unregistered-vendor-bill-of-supply.astro# Interactive PDF Generator
+│       ├── about.astro                             # AdSense Compliance Page
+│       ├── privacy-policy.astro                    # AdSense Compliance Page
+│       └── terms-of-service.astro                  # AdSense Compliance Page
+├── astro.config.mjs        # Astro configuration
+└── tailwind.config.cjs     # Tailwind configuration
