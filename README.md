@@ -43,5 +43,5 @@ To run this project locally, you need Node.js installed.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/yourusername/vendordesk-astro-utility-hub.git](https://github.com/yourusername/vendordesk-astro-utility-hub.git)
+   git clone [https://github.com/suchetan3511/vendordesk-astro-utility-hub.git](https://github.com/suchetan3511/vendordesk-astro-utility-hub.git)
    cd vendordesk-astro-utility-hub
