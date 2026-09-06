@@ -10,7 +10,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 	data-header
 >
 	<div class="relative mx-auto flex h-14 max-w-page items-center justify-between gap-4 px-5 sm:px-8">
-		<a href="/" class="press flex items-center gap-2.5 rounded-full" aria-label={`${SITE.name} home`}>
+		<a href="/" class="press -mx-2 flex min-h-11 items-center gap-2.5 rounded-full px-2" aria-label={`${SITE.name} home`}>
 			<Logo />
 			<span class="text-[17px] font-semibold tracking-[-0.02em] text-ink" translate="no">{SITE.name}</span>
 		</a>

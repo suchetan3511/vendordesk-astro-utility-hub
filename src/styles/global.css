@@ -167,10 +167,15 @@
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    /* Reserve the scrollbar track so short and tall pages don't shift horizontally. */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-canvas text-ink font-sans text-body antialiased;
     font-optical-sizing: auto;
+    /* `clip` (not `hidden`) contains stray overflow without creating a scroll container,
+       so `position: sticky` keeps working. */
+    overflow-x: clip;
   }
   h1,
   h2,
@@ -223,6 +228,23 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  /* Touch devices: every control reaches the 44px comfortable-tap minimum. */
+  @media (pointer: coarse) {
+    .btn-sm,
+    .btn-utility,
+    .btn-quiet,
+    .segmented > button,
+    header nav a,
+    [data-remove-item],
+    [data-add-item] {
+      min-height: 2.75rem;
+    }
+    .checkbox {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 }
@@ -328,6 +350,19 @@
 
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-2 px-3 py-1 text-fine font-semibold text-ink-2;
+  }
+
+  .checkbox {
+    @apply size-5 shrink-0 accent-primary;
+  }
+
+  /* Quiet inline control (Reset, Clear draft) that still offers a real tap target. */
+  .btn-quiet {
+    @apply -my-1.5 inline-flex min-h-9 items-center rounded-sm px-1.5 py-1.5 text-caption text-ink-2 underline decoration-hairline-strong underline-offset-4;
+    transition: color 160ms var(--ease-out-quart);
+  }
+  .btn-quiet:hover {
+    @apply text-ink decoration-current;
   }
 
   .segmented {
