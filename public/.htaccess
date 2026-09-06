@@ -52,6 +52,10 @@
 	RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)\.html[\s?] [NC]
 	RewriteRule ^ /%1 [R=301,L]
 
+	# The sitemap moved from the hand-built /sitemap.xml to @astrojs/sitemap's index file;
+	# anything that cached the old robots.txt or head link should land on the new one.
+	RewriteRule ^sitemap\.xml$ /sitemap-index.xml [R=301,L]
+
 	# /about/ → /about. Real directories are exempt so /_astro/ still resolves.
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^(.+?)/$ /$1 [R=301,L]

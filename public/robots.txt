@@ -4,4 +4,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vendordesk.tools/sitemap.xml
+Sitemap: https://vendordesk.tools/sitemap-index.xml
