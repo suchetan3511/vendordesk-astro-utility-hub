@@ -1,8 +1,12 @@
 export const SITE = {
 	name: 'VendorDesk',
-	legalName: 'VendorDesk.in',
-	url: 'https://vendordesk.in',
-	email: 'hello@vendordesk.in',
+	legalName: 'VendorDesk.tools',
+	/** Bare host, for the "Generated with …" lines stamped into exported documents. */
+	domain: 'vendordesk.tools',
+	url: 'https://vendordesk.tools',
+	// Single point of contact for the whole site: footer, contact page, legal pages and
+	// the Organization schema all read this.
+	email: 'support@himmerz.com',
 	tagline: 'Lightning-fast utilities for independent businesses & designers.',
 	// Kept under ~155 characters so Google shows it without truncating.
 	description:
@@ -23,27 +27,11 @@ export interface ToolMeta {
 	keywords: string[];
 }
 
+/**
+ * Order matters: the Bill of Supply generator is the flagship tool, so it leads
+ * the tool grid, the footer and every list built from this array.
+ */
 export const TOOLS: ToolMeta[] = [
-	{
-		slug: 'paper-bag-die-line-generator',
-		href: '/paper-bag-die-line-generator',
-		name: 'Paper Bag Dieline Generator',
-		shortName: 'Dieline Generator',
-		category: 'Packaging',
-		description:
-			'Turn height, width and gusset into a print-ready SVG dieline with material-aware bleed, luxury or rustic folds and seamless sticker layout lines.',
-		features: ['Instant SVG & PNG export', 'Material-aware bleed', 'Seamless sticker guides', 'Sheet yield calculator'],
-		audience: 'Digital designers · Packaging manufacturers',
-		keywords: [
-			'paper bag dieline generator',
-			'bag dieline generator',
-			'paper bag template generator',
-			'free dieline generator',
-			'packaging dieline svg',
-			'SOS bag dieline',
-			'gusset bag template',
-		],
-	},
 	{
 		slug: 'unregistered-vendor-bill-of-supply',
 		href: '/unregistered-vendor-bill-of-supply',
@@ -64,11 +52,41 @@ export const TOOLS: ToolMeta[] = [
 			'unregistered vendor bill',
 		],
 	},
+	{
+		slug: 'paper-bag-die-line-generator',
+		href: '/paper-bag-die-line-generator',
+		name: 'Paper Bag Dieline Generator',
+		shortName: 'Dieline Generator',
+		category: 'Packaging',
+		description:
+			'Turn height, width and gusset into a print-ready SVG dieline with material-aware bleed, luxury or rustic folds and seamless sticker layout lines.',
+		features: ['Instant SVG & PNG export', 'Material-aware bleed', 'Seamless sticker guides', 'Sheet yield calculator'],
+		audience: 'Digital designers · Packaging manufacturers',
+		keywords: [
+			'paper bag dieline generator',
+			'bag dieline generator',
+			'paper bag template generator',
+			'free dieline generator',
+			'packaging dieline svg',
+			'SOS bag dieline',
+			'gusset bag template',
+		],
+	},
 ];
 
+const bySlug = (slug: string): ToolMeta => {
+	const tool = TOOLS.find((t) => t.slug === slug);
+	if (!tool) throw new Error(`Unknown tool slug: ${slug}`);
+	return tool;
+};
+
+/** Named handles so pages never depend on the position of a tool in TOOLS. */
+export const BILL = bySlug('unregistered-vendor-bill-of-supply');
+export const DIELINE = bySlug('paper-bag-die-line-generator');
+
 export const NAV = [
-	{ href: '/paper-bag-die-line-generator', label: 'Dieline Generator' },
-	{ href: '/unregistered-vendor-bill-of-supply', label: 'Bill of Supply' },
+	{ href: BILL.href, label: BILL.shortName },
+	{ href: DIELINE.href, label: DIELINE.shortName },
 	{ href: '/about', label: 'About' },
 	{ href: '/contact', label: 'Contact' },
 ] as const;

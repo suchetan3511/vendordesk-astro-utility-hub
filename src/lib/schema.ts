@@ -71,8 +71,15 @@ export function softwareApplication(app: SoftwareAppInput): JsonLd {
 		featureList: app.features,
 		keywords: app.keywords?.join(', '),
 		softwareVersion: '1.0',
+		availableOnDevice: 'Any device with a modern web browser',
+		// Accurate and worth stating: the tools are client-side, so nothing is uploaded or stored.
+		storageRequirements: 'None — files are generated in the browser and nothing is uploaded',
+		countriesSupported: 'IN',
+		usageInfo: abs('/terms-of-service'),
+		mainEntityOfPage: { '@id': `${abs(app.path)}#webpage` },
 		author: { '@id': ORGANIZATION_ID },
 		publisher: { '@id': ORGANIZATION_ID },
+		provider: { '@id': ORGANIZATION_ID },
 		inLanguage: 'en-IN',
 	};
 }
@@ -94,9 +101,12 @@ export function faqPage(faqs: Faq[], path: string): JsonLd {
 	};
 }
 
+/** The trail's last entry owns the breadcrumb, so its @id can be referenced from that page's WebPage node. */
 export function breadcrumb(items: { name: string; path: string }[]): JsonLd {
+	const last = items[items.length - 1];
 	return {
 		'@type': 'BreadcrumbList',
+		'@id': `${abs(last.path)}#breadcrumb`,
 		itemListElement: items.map((item, i) => ({
 			'@type': 'ListItem',
 			position: i + 1,
@@ -106,7 +116,35 @@ export function breadcrumb(items: { name: string; path: string }[]): JsonLd {
 	};
 }
 
-export function webPage(input: { name: string; path: string; description: string; type?: string }): JsonLd {
+/** An ordered list of the tools a page presents. Position 1 is the tool we want read as primary. */
+export function itemList(input: { path: string; name: string; items: { name: string; path: string; description: string }[] }): JsonLd {
+	return {
+		'@type': 'ItemList',
+		'@id': `${abs(input.path)}#tools`,
+		name: input.name,
+		numberOfItems: input.items.length,
+		itemListOrder: 'https://schema.org/ItemListOrderAscending',
+		itemListElement: input.items.map((item, i) => ({
+			'@type': 'ListItem',
+			position: i + 1,
+			name: item.name,
+			description: item.description,
+			url: abs(item.path),
+		})),
+	};
+}
+
+export function webPage(input: {
+	name: string;
+	path: string;
+	description: string;
+	type?: string;
+	/** @id of the node this page is primarily about (the tool, or the list of tools). */
+	mainEntity?: string;
+	/** Link the page to the BreadcrumbList emitted for the same path. */
+	hasBreadcrumb?: boolean;
+	image?: string;
+}): JsonLd {
 	return {
 		'@type': input.type ?? 'WebPage',
 		'@id': `${abs(input.path)}#webpage`,
@@ -114,9 +152,15 @@ export function webPage(input: { name: string; path: string; description: string
 		name: input.name,
 		description: input.description,
 		isPartOf: { '@id': WEBSITE_ID },
+		primaryImageOfPage: { '@type': 'ImageObject', url: abs(input.image ?? '/og.png') },
+		...(input.mainEntity ? { mainEntity: { '@id': input.mainEntity } } : {}),
+		...(input.hasBreadcrumb ? { breadcrumb: { '@id': `${abs(input.path)}#breadcrumb` } } : {}),
 		inLanguage: 'en-IN',
 	};
 }
+
+/** @id of the SoftwareApplication node emitted for a tool path. */
+export const appId = (path: string) => `${abs(path)}#app`;
 
 /** Wraps one or more schema nodes into a single JSON-LD graph and escapes it for inline <script>. */
 export function toJsonLd(nodes: JsonLd | JsonLd[]): string {

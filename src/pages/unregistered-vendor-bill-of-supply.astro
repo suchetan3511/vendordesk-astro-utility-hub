@@ -2,14 +2,24 @@
 import Layout from '../layouts/Layout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Faq from '../components/Faq.astro';
-import { TOOLS } from '../lib/site';
-import { breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { BILL, DIELINE, SITE } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
 import { ITEM_UNITS, STATES } from '../lib/india';
 
-const tool = TOOLS[1];
+const tool = BILL;
 const title = 'Free Bill of Supply Generator — GST Format, PDF';
 const description =
 	'Create a GST bill of supply online free and download the PDF. For composition dealers, exempt supplies, restaurants and small sellers. No sign-up.';
+
+/** Editorial sections, in page order. Ids double as deep-link targets for search results. */
+const sections = [
+	{ id: 'tax-invoice-vs-bill-of-supply', label: 'Tax Invoice vs. Bill of Supply' },
+	{ id: 'three-situations', label: 'The three situations that call for one' },
+	{ id: 'who-its-for', label: 'Who this free bill generator is for' },
+	{ id: 'rule-49-fields', label: 'What Rule 49 requires on the document' },
+	{ id: 'small-value-supplies', label: 'Small-value supplies and the ₹200 rule' },
+	{ id: 'mistakes-to-avoid', label: 'Mistakes to avoid' },
+];
 
 const faqs = [
 	{
@@ -55,7 +65,7 @@ const faqs = [
 ];
 
 const schema = [
-	webPage({ name: title, path: tool.href, description }),
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true }),
 	softwareApplication({
 		name: tool.name,
 		path: tool.href,
@@ -406,7 +416,7 @@ const schema = [
 										<p>Authorised signatory</p>
 									</div>
 								</section>
-								<p class="bos-fine">This is a Bill of Supply under the CGST Rules, 2017. No input tax credit is available on this document. Generated with vendordesk.in</p>
+								<p class="bos-fine">This is a Bill of Supply under the CGST Rules, 2017. No input tax credit is available on this document. Generated with {SITE.domain}</p>
 							</div>
 						</div>
 					</div>
@@ -480,12 +490,29 @@ const schema = [
 		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
 			<div class="rich-text">
 				<p class="eyebrow">The rules, explained</p>
-				<h2 class="mt-3!">When must an Indian business issue a Bill of Supply instead of a Tax Invoice?</h2>
+				<h2 id="when-to-issue" class="mt-3!">When must an Indian business issue a Bill of Supply instead of a Tax Invoice?</h2>
 				<p class="lede">
 					Under the GST law, the document you hand to a customer tells them — and the tax department — whether tax was charged
 					and whether they can claim credit for it. Choosing the wrong one is one of the most common compliance slips small
 					suppliers make. Here is where the line falls.
 				</p>
+
+				{/* `list-none pl-0` and `mt-0` override the .rich-text list styling, which would
+				    otherwise bullet and indent this nav. */}
+				<nav aria-label="On this page" class="my-8 rounded-md border border-hairline bg-parchment p-5">
+					<p class="text-caption font-semibold text-ink">On this page</p>
+					<ul class="mt-3 grid list-none gap-x-6 gap-y-2 pl-0 sm:grid-cols-2">
+						{
+							sections.map((s) => (
+								<li class="mt-0!">
+									<a href={`#${s.id}`} class="link text-caption">
+										{s.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</nav>
 
 				<h3>What a Bill of Supply is</h3>
 				<p>
@@ -496,7 +523,7 @@ const schema = [
 					cannot claim any input tax credit against it.
 				</p>
 
-				<h3>Tax Invoice vs. Bill of Supply at a glance</h3>
+				<h3 id="tax-invoice-vs-bill-of-supply">Tax Invoice vs. Bill of Supply at a glance</h3>
 				<div class="table-wrap">
 					<table>
 						<thead>
@@ -512,7 +539,7 @@ const schema = [
 					</table>
 				</div>
 
-				<h2>The three situations that call for a Bill of Supply</h2>
+				<h2 id="three-situations">The three situations that call for a Bill of Supply</h2>
 				<h3>1. You are a composition dealer</h3>
 				<p>
 					The composition scheme under Section 10 lets small businesses — manufacturers, traders and restaurants with aggregate
@@ -543,7 +570,7 @@ const schema = [
 					is what most customers, accountants and marketplaces expect to see.
 				</p>
 
-				<h2>Who this free bill generator is for</h2>
+				<h2 id="who-its-for">Who this free bill generator is for</h2>
 				<p>
 					Most online bill generators are built for a regular GST-registered business charging tax. This one is deliberately
 					the opposite: it is for the far larger group of Indian sellers who <strong>must not</strong> put GST on the
@@ -579,7 +606,7 @@ const schema = [
 					billed on a bill of supply even by a regular registered business, because there is no tax to show.
 				</p>
 
-				<h2>What Rule 49 says the document must contain</h2>
+				<h2 id="rule-49-fields">What Rule 49 says the document must contain</h2>
 				<ol>
 					<li>Name, address and GSTIN of the supplier (GSTIN not applicable to unregistered vendors).</li>
 					<li>A consecutive serial number, unique for the financial year, of up to 16 characters (letters, numerals, hyphens and slashes).</li>
@@ -596,7 +623,7 @@ const schema = [
 					misread.
 				</p>
 
-				<h2>Small-value supplies and the ₹200 rule</h2>
+				<h2 id="small-value-supplies">Small-value supplies and the ₹200 rule</h2>
 				<p>
 					Rule 49 borrows the relaxations in Rule 46: a registered person need not issue a bill of supply where the value of the
 					supply is <strong>less than ₹200</strong>, the recipient is not registered and does not ask for one — provided a
@@ -604,7 +631,7 @@ const schema = [
 					other law (for example a receipt under a state VAT law for alcohol) is treated as a bill of supply for GST purposes.
 				</p>
 
-				<h2>Mistakes to avoid</h2>
+				<h2 id="mistakes-to-avoid">Mistakes to avoid</h2>
 				<ul>
 					<li><strong>Titling it “Tax Invoice”.</strong> The heading itself signals that tax was charged. Use “Bill of Supply”.</li>
 					<li><strong>Adding a GST line while unregistered.</strong> Even a “0%” line invites questions; leave tax out entirely.</li>
@@ -639,7 +666,7 @@ const schema = [
 				<h2 class="text-title text-on-tile">Printing packaging for the same client?</h2>
 				<p class="mt-2 text-body text-on-tile-2">Generate a real-scale paper bag die-line with material-aware bleed in seconds.</p>
 			</div>
-			<a href={TOOLS[0].href} class="btn btn-primary shrink-0">Open the paper bag dieline generator</a>
+			<a href={DIELINE.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the dieline generator</a>
 		</div>
 	</section>
 </Layout>

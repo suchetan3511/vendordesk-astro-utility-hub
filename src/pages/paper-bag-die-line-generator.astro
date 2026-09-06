@@ -2,11 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Faq from '../components/Faq.astro';
-import { TOOLS, SITE } from '../lib/site';
-import { breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { BILL, DIELINE, SITE } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
 import { MATERIALS, PRESETS, STYLES, DEFAULT_INPUT } from '../scripts/dieline';
 
-const tool = TOOLS[0];
+const tool = DIELINE;
 const title = 'Free Paper Bag Dieline Generator — SVG Template';
 const description =
 	'Free bag dieline generator: enter height, width and gusset, pick your material, then download a real-scale SVG or PNG paper bag template. No sign-up.';
@@ -40,7 +40,7 @@ const faqs = [
 ];
 
 const schema = [
-	webPage({ name: title, path: tool.href, description }),
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true }),
 	softwareApplication({
 		name: tool.name,
 		path: tool.href,
@@ -392,7 +392,7 @@ const schema = [
 					Generate a GST-compliant Bill of Supply for unregistered vendors and composition dealers — as a PDF, in your browser.
 				</p>
 			</div>
-			<a href={TOOLS[1].href} class="btn btn-primary shrink-0">Open the Bill of Supply generator</a>
+			<a href={BILL.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the Bill of Supply</a>
 		</div>
 	</section>
 </Layout>

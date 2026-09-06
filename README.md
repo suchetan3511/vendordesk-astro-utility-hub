@@ -8,7 +8,7 @@ Lightning-fast, client-side utility hub built with Astro and Tailwind CSS. Featu
 
 **VendorDesk** is a lightning-fast, static B2B utility hub designed to provide independent businesses, freelancers, and designers with client-side compliance tools and calculators. 
 
-Live Demo: [vendordesk.in](https://vendordesk.in) *(Note: Update with live link once deployed)*
+Live Demo: [vendordesk.tools](https://vendordesk.tools)
 
 ---
 
@@ -43,5 +43,42 @@ To run this project locally, you need Node.js installed.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/suchetan3511/vendordesk-astro-utility-hub.git](https://github.com/suchetan3511/vendordesk-astro-utility-hub.git)
+   git clone https://github.com/suchetan3511/vendordesk-astro-utility-hub.git
    cd vendordesk-astro-utility-hub
+   ```
+
+2. **Install and run:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+3. **Build for production:**
+   ```bash
+   npm run build      # writes the deployable site to dist/
+   npm run preview    # serves dist/ locally for a final check
+   ```
+
+---
+
+## 🌐 Deployment (Hostinger)
+
+The site is a fully static build hosted on Hostinger's Apache/LiteSpeed web hosting at **vendordesk.tools**. There is no server-side code and nothing to run on the host.
+
+*   **What to upload:** the *contents* of `dist/` — including the hidden `dist/.htaccess` — into `public_html/`. The build must be from `npm run build`; never upload `src/` or `node_modules/`.
+*   **`.htaccess` is not optional.** It is what makes the server agree with the SEO configuration:
+    *   Redirects `http://`, `www.` and `http://www.` to `https://vendordesk.tools` in a single hop, so ranking signals are not split across four hosts.
+    *   Serves clean URLs (`/about`) from the flat `about.html` files that `build.format: 'file'` emits, and 301s `/about/` and `/about.html` back to the canonical form. Without it Apache would 301 every canonical URL to a trailing-slash variant.
+    *   Turns on gzip/brotli, sets immutable caching on the hashed `/_astro/` assets, wires the real `404.html`, and sets the security headers.
+*   **SSL:** enable Hostinger's free Let's Encrypt certificate for the domain *before* the first upload. `.htaccess` sends an HSTS header, so the site must answer over HTTPS from day one.
+*   **Post-deploy checks:** from any terminal, each of these should return the status on the right, and the last should show `Content-Encoding`:
+    ```bash
+    curl -sI http://vendordesk.tools/            # 301 → https://vendordesk.tools/
+    curl -sI https://www.vendordesk.tools/about  # 301 → https://vendordesk.tools/about
+    curl -sI https://vendordesk.tools/about/     # 301 → https://vendordesk.tools/about
+    curl -sI https://vendordesk.tools/about.html # 301 → https://vendordesk.tools/about
+    curl -sI https://vendordesk.tools/about      # 200
+    curl -sI https://vendordesk.tools/nope       # 404 (the styled page, not Apache's default)
+    curl -sI -H "Accept-Encoding: gzip, br" https://vendordesk.tools/  # Content-Encoding: gzip or br
+    ```
+*   **After go-live:** submit `https://vendordesk.tools/sitemap.xml` in Google Search Console and verify the domain property. The sitemap is already referenced from `robots.txt` and every page's `<head>`.

@@ -1,0 +1,47 @@
+---
+import { NAV, TOOLS } from '../lib/site';
+
+interface Props {
+	/** HTTP status, shown as the eyebrow. */
+	code: string;
+	title: string;
+	lead: string;
+}
+const { code, title, lead } = Astro.props;
+
+/** Every routable page, so a dead end still offers a way to everywhere else. */
+const allPages = [
+	{ href: '/', label: 'Home' },
+	...NAV.map((item) => ({ href: item.href, label: item.label })),
+	{ href: '/privacy-policy', label: 'Privacy Policy' },
+	{ href: '/terms-of-service', label: 'Terms of Service' },
+];
+---
+
+<section class="bg-canvas">
+	<div class="mx-auto max-w-page px-5 py-20 sm:px-8 sm:py-28">
+		<p class="eyebrow tnum">{code}</p>
+		<h1 class="mt-3 text-display text-ink">{title}</h1>
+		<p class="mt-4 max-w-xl text-lead text-ink-2">{lead}</p>
+
+		<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+			<a href="/" class="btn btn-primary">Back to the homepage</a>
+			{TOOLS.map((t) => <a href={t.href} class="btn btn-ghost">{t.shortName}</a>)}
+		</div>
+
+		<nav aria-label="All pages" class="mt-12 border-t border-hairline pt-6">
+			<h2 class="text-caption font-semibold text-ink">All pages</h2>
+			<ul class="mt-3 grid gap-x-8 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+				{
+					allPages.map((page) => (
+						<li>
+							<a href={page.href} class="inline-flex min-h-10 items-center text-caption text-ink-2 transition-colors hover:text-ink">
+								{page.label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+	</div>
+</section>

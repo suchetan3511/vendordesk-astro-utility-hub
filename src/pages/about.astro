@@ -2,15 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { SITE, TOOLS } from '../lib/site';
-import { breadcrumb, organization, webPage } from '../lib/schema';
+import { breadcrumb, webPage } from '../lib/schema';
 
 const title = 'About';
 const description =
 	'VendorDesk builds free, client-side browser tools for small businesses, designers and packaging specialists — no paywalls, no sign-ups, nothing uploaded.';
 
 const schema = [
-	webPage({ name: title, path: '/about', description, type: 'AboutPage' }),
-	organization(),
+	webPage({ name: title, path: '/about', description, type: 'AboutPage', hasBreadcrumb: true }),
 	breadcrumb([
 		{ name: 'Home', path: '/' },
 		{ name: 'About', path: '/about' },

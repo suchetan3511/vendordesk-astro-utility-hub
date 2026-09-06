@@ -1,0 +1,36 @@
+{
+	"name": "VendorDesk — Bill of Supply & Dieline Generators",
+	"short_name": "VendorDesk",
+	"description": "Free bill of supply generator and paper bag dieline generator that run entirely in your browser.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#f5f5f7",
+	"lang": "en-IN",
+	"dir": "ltr",
+	"categories": ["business", "productivity", "utilities"],
+	"icons": [
+		{
+			"src": "/apple-touch-icon.png",
+			"sizes": "180x180",
+			"type": "image/png"
+		},
+		{
+			"src": "/favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Create a Bill of Supply",
+			"url": "/unregistered-vendor-bill-of-supply"
+		},
+		{
+			"name": "Generate a paper bag dieline",
+			"url": "/paper-bag-die-line-generator"
+		}
+	]
+}

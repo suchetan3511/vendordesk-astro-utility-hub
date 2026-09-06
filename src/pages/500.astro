@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ErrorPage from '../components/ErrorPage.astro';
+---
+
+<Layout title="Something went wrong" description="An unexpected error occurred while loading this page." noindex>
+	<ErrorPage
+		code="500"
+		title="Something went wrong on our side."
+		lead="This one is not your fault. Reload the page — and if it keeps happening, the tools themselves run entirely in your browser, so they are usually still fine."
+	/>
+</Layout>
