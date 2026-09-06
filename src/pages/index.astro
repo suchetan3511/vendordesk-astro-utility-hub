@@ -1,11 +1,230 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import Faq from '../components/Faq.astro';
+import DielineArt from '../components/art/DielineArt.astro';
+import BillArt from '../components/art/BillArt.astro';
+import { SITE, TOOLS } from '../lib/site';
+import { organization, website, webPage } from '../lib/schema';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const title = `${SITE.name} — Free browser tools for independent businesses & designers`;
+const description = SITE.description;
+
+const principles = [
+	{
+		n: '01',
+		title: 'Nothing leaves your browser',
+		body: 'Every calculation, SVG and PDF is produced by JavaScript on your device. There is no upload, no account and no server that ever sees your dimensions, clients or amounts.',
+	},
+	{
+		n: '02',
+		title: 'Loads before you finish reading this',
+		body: 'Pages ship as static HTML and CSS. The only script that runs is the tool you are using — no frameworks, no chat widgets, no cookie walls slowing you down.',
+	},
+	{
+		n: '03',
+		title: 'Built for Indian B2B reality',
+		body: 'Millimetres and inches. Kraft, art paper and grain-lined stock. GST composition rules and the lakh–crore number system. Details generic tools skip.',
+	},
+];
+
+const steps = [
+	{ title: 'Type your numbers', body: 'Bag dimensions or bill details — a handful of fields, sensible defaults, presets for the common cases.' },
+	{ title: 'Watch it update live', body: 'The die-line preview, sheet math and document redraw as you type. No “calculate” button, no page reloads.' },
+	{ title: 'Download and go', body: 'Real-scale SVG and PNG for the die-line; an A4 PDF for the bill. Files are generated on the spot.' },
+];
+
+const audiences = [
+	{ title: 'Digital designers', body: 'Structural templates at 1:1 scale, ready for Illustrator, Affinity or Inkscape.' },
+	{ title: 'Packaging manufacturers', body: 'Material-aware allowances and parent-sheet yield to quote jobs faster.' },
+	{ title: 'Freelancers & consultants', body: 'A clean Bill of Supply when you are below the GST threshold or under composition.' },
+	{ title: 'Retail suppliers', body: 'Correctly worded documents for exempt goods and composition-scheme sales.' },
+];
+
+const faqs = [
+	{
+		question: 'Is VendorDesk really free?',
+		answer: 'Yes. Every tool on this site is free to use with no account, no watermark and no download limit. We may show unobtrusive advertising to keep the lights on.',
+	},
+	{
+		question: 'Do you store what I type into a tool?',
+		answer:
+			'No. The tools run entirely in your browser. Some tools can remember your last inputs in your own browser’s local storage so you can continue later — that data stays on your device and you can clear it at any time. Read the <a href="/privacy-policy">privacy policy</a>.',
+	},
+	{
+		question: 'Can I rely on the outputs for production or filing?',
+		answer:
+			'The tools are precise, but they are estimation and layout aids. Always proof a physical packaging mock-up and confirm tax documents with your accountant. See the <a href="/terms-of-service">terms of service</a>.',
+	},
+	{
+		question: 'Will there be more tools?',
+		answer:
+			'That is the plan. VendorDesk exists to replace bloated, gated SaaS calculators with fast single-purpose utilities. <a href="/contact">Tell us</a> which task wastes your time and we will look at building it.',
+	},
+];
+
+const schema = [
+	website(),
+	organization(),
+	webPage({ name: title, path: '/', description, type: 'CollectionPage' }),
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title={title} description={description} schema={schema} titleTemplate={false}>
+	<!-- Hero -->
+	<section class="relative overflow-hidden bg-canvas">
+		<div class="mx-auto grid max-w-page items-center gap-12 px-5 pt-14 pb-16 sm:px-8 sm:pt-20 sm:pb-24 lg:grid-cols-[1.2fr_1fr] lg:gap-14 lg:pt-24 lg:pb-28">
+			<div class="max-w-2xl">
+				<p class="eyebrow animate-fade-up">Free · No sign-up · Runs entirely in your browser</p>
+				<h1 class="mt-4 text-hero text-ink animate-fade-up" style="animation-delay: 80ms">
+					Lightning‑fast utilities for independent businesses &amp;&nbsp;designers.
+				</h1>
+				<p class="mt-6 max-w-xl text-lead text-ink-2 animate-fade-up" style="animation-delay: 160ms">
+					Single-purpose tools that do one job perfectly: generate a print-ready paper bag die-line, or a GST-compliant Bill
+					of Supply. Type your numbers, download the file, get on with your day.
+				</p>
+				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-up" style="animation-delay: 240ms">
+					<a href={TOOLS[0].href} class="btn btn-primary btn-lg">Generate a die-line</a>
+					<a href={TOOLS[1].href} class="btn btn-secondary btn-lg">Create a Bill of Supply</a>
+				</div>
+				<ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-caption text-ink-2 animate-fade-up" style="animation-delay: 320ms">
+					{
+						['No account', 'Nothing uploaded', 'Real-scale exports', 'Light & dark mode'].map((item) => (
+							<li class="flex items-center gap-2">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-success">
+									<path d="M5 12.5l4.5 4.5L19 7.5" />
+								</svg>
+								{item}
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div class="relative animate-fade-up" style="animation-delay: 200ms">
+				<div class="relative rounded-xl border border-hairline bg-parchment p-4 sm:p-8">
+					<div class="rounded-lg bg-paper p-3 shadow-product sm:p-5">
+						<DielineArt animate class="h-auto w-full" />
+					</div>
+					<div class="pointer-events-none absolute top-6 left-6 hidden rounded-full border border-hairline bg-surface px-3 py-1.5 text-fine font-semibold text-ink-2 sm:block">
+						250 × 350 × 100 mm · Luxury · Art paper
+					</div>
+					<div class="pointer-events-none absolute right-6 bottom-6 hidden rounded-full bg-primary px-3 py-1.5 text-fine font-semibold text-on-primary sm:block">
+						SVG · 1:1 scale
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Tools -->
+	<section id="tools" class="border-y border-hairline bg-parchment" aria-labelledby="tools-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
+			<div class="max-w-2xl">
+				<p class="eyebrow">The tools</p>
+				<h2 id="tools-heading" class="mt-3 text-display text-ink">Two tools. Zero friction.</h2>
+				<p class="mt-4 text-lead text-ink-2">
+					Each one replaces a bloated SaaS sign-up flow with a page that is ready the moment it loads.
+				</p>
+			</div>
+			<div class="mt-10 grid gap-5 md:grid-cols-2 md:gap-6">
+				<ToolCard tool={TOOLS[0]} index={0}>
+					<DielineArt slot="art" class="h-auto w-[86%]" />
+				</ToolCard>
+				<ToolCard tool={TOOLS[1]} index={1}>
+					<BillArt slot="art" class="h-auto w-[86%]" />
+				</ToolCard>
+			</div>
+		</div>
+	</section>
+
+	<!-- Principles (dark tile) -->
+	<section class="bg-tile text-on-tile" aria-labelledby="principles-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
+			<div class="max-w-2xl">
+				<p class="eyebrow text-on-tile-2">Why VendorDesk</p>
+				<h2 id="principles-heading" class="mt-3 text-display text-on-tile">Built the way a utility should be.</h2>
+			</div>
+			<div class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+				{
+					principles.map((p) => (
+						<div class="border-t border-white/15 pt-6">
+							<p class="tnum text-caption text-on-tile-2">{p.n}</p>
+							<h3 class="mt-3 text-title text-on-tile">{p.title}</h3>
+							<p class="mt-3 text-body text-on-tile-2">{p.body}</p>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- How it works -->
+	<section class="bg-canvas" aria-labelledby="how-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
+			<div class="grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
+				<div>
+					<p class="eyebrow">How it works</p>
+					<h2 id="how-heading" class="mt-3 text-display text-ink">Three steps, thirty seconds.</h2>
+					<p class="mt-4 text-body text-ink-2">No onboarding, no tutorial video. If you can fill in a form, you already know how to use VendorDesk.</p>
+				</div>
+				<ol class="grid gap-4 sm:grid-cols-3">
+					{
+						steps.map((s, i) => (
+							<li class="card p-6">
+								<span class="tnum inline-grid size-9 place-items-center rounded-full bg-primary text-caption font-semibold text-on-primary">{i + 1}</span>
+								<h3 class="mt-5 text-[1.0625rem] font-semibold text-ink">{s.title}</h3>
+								<p class="mt-2 text-caption text-ink-2">{s.body}</p>
+							</li>
+						))
+					}
+				</ol>
+			</div>
+		</div>
+	</section>
+
+	<!-- Audiences -->
+	<section class="border-y border-hairline bg-parchment" aria-labelledby="audience-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
+			<div class="max-w-2xl">
+				<p class="eyebrow">Made for</p>
+				<h2 id="audience-heading" class="mt-3 text-display text-ink">People who bill, print and ship for themselves.</h2>
+			</div>
+			<ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				{
+					audiences.map((a) => (
+						<li class="card p-6">
+							<h3 class="text-[1.0625rem] font-semibold text-ink">{a.title}</h3>
+							<p class="mt-2 text-caption text-ink-2">{a.body}</p>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="bg-canvas" aria-labelledby="faq-heading">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 id="faq-heading" class="mt-3 text-title text-ink">Good questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="home-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Final CTA -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-display text-on-tile">Start with the tool you need today.</h2>
+				<p class="mt-3 text-body text-on-tile-2">Both are free, both are instant, and neither will ask you for an email address.</p>
+			</div>
+			<div class="flex shrink-0 flex-col gap-3 sm:flex-row">
+				<a href={TOOLS[0].href} class="btn btn-primary">Die-line generator</a>
+				<a href={TOOLS[1].href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Bill of Supply</a>
+			</div>
+		</div>
+	</section>
 </Layout>

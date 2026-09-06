@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE, TOOLS } from '../lib/site';
+import { breadcrumb, organization, webPage } from '../lib/schema';
+
+const title = 'About VendorDesk';
+const description =
+	'VendorDesk builds fast, free, client-side browser tools for independent businesses, digital designers and packaging specialists — no paywalls, no sign-ups, and nothing you type ever leaves your device.';
+
+const schema = [
+	webPage({ name: title, path: '/about', description, type: 'AboutPage' }),
+	organization(),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: 'About', path: '/about' },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema}>
+	<PageHeader
+		eyebrow="About"
+		title="Fast tools for people who do their own billing, printing and shipping."
+		lead="VendorDesk is a small, independent project with one purpose: replace the bloated, gated calculators that independent businesses are forced to use with browser tools that are instant, private and free."
+		crumbs={[{ name: 'Home', href: '/' }, { name: 'About' }]}
+	/>
+
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<h2 class="mt-0!">Our mission</h2>
+				<p>
+					A designer preparing a paper bag for a client should not need a 3D rendering account to get a die-line. A freelancer
+					invoicing a retail client should not have to verify an email address and dodge three upsells to download a one-page
+					document. These are small, well-defined problems — and small, well-defined problems deserve small, precise tools.
+				</p>
+				<p>
+					VendorDesk exists to build those tools for <strong>independent businesses, digital designers and packaging
+					specialists</strong>, and to keep them free of paywalls. Each tool does one job, does it properly, and gets out of
+					the way.
+				</p>
+
+				<h2>How we build</h2>
+				<h3>Client-side by design</h3>
+				<p>
+					Every VendorDesk tool runs completely in your web browser. The die-line SVG is drawn by JavaScript on your machine;
+					the Bill of Supply PDF is assembled on your machine. We have no server that receives your inputs, which means we
+					cannot lose, leak or sell your packaging dimensions, client names or amounts — because we never have them.
+				</p>
+				<h3>Static and fast</h3>
+				<p>
+					The site is generated ahead of time as plain HTML and CSS. There are no frameworks hydrating on load, no chat
+					bubbles, no cookie banners. Pages are typically interactive in well under a second on a mid-range phone, which is
+					where most of our visitors are.
+				</p>
+				<h3>Honest about limits</h3>
+				<p>
+					Our tools are precise, but packaging tooling and tax documents both have consequences. We say so plainly on every
+					tool page, we explain the maths and the rules we apply, and we ask you to proof a physical mock-up or talk to your
+					accountant before you commit. See the <a href="/terms-of-service">terms of service</a>.
+				</p>
+
+				<h2>What is live today</h2>
+				<ul>
+					{
+						TOOLS.map((t) => (
+							<li>
+								<a href={t.href}>{t.name}</a> — {t.description}
+							</li>
+						))
+					}
+				</ul>
+				<p>
+					More single-purpose utilities are on the way. If a repetitive calculation or document is stealing your afternoons,
+					<a href="/contact">tell us about it</a> — the tools we build next are chosen from those requests.
+				</p>
+
+				<h2>Who is behind VendorDesk</h2>
+				<p>
+					VendorDesk is built and maintained independently from India by people who have run small design and supply
+					businesses themselves. It is not backed by a SaaS company and is not a lead-generation funnel for one. The project is
+					supported by unobtrusive advertising so that the tools can stay free for everyone.
+				</p>
+				<p>
+					Questions, corrections or ideas: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+				</p>
+			</div>
+		</div>
+	</section>
+</Layout>

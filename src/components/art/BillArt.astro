@@ -1,0 +1,39 @@
+---
+/** Decorative miniature of a Bill of Supply document. */
+interface Props {
+	class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<svg viewBox="0 0 360 232" class={className} role="img" aria-label="Illustration of a Bill of Supply PDF document">
+	<rect x="94" y="14" width="172" height="232" rx="6" fill="#ffffff" stroke="#e5e5ea"></rect>
+	<rect x="110" y="30" width="46" height="8" rx="2" fill="#1d1d1f"></rect>
+	<rect x="110" y="42" width="72" height="4" rx="2" fill="#c7c7cc"></rect>
+	<rect x="212" y="30" width="38" height="5" rx="2" fill="#0066cc"></rect>
+	<rect x="220" y="40" width="30" height="4" rx="2" fill="#c7c7cc"></rect>
+	<rect x="110" y="62" width="140" height="1" fill="#e5e5ea"></rect>
+	<rect x="110" y="72" width="28" height="4" rx="2" fill="#86868b"></rect>
+	<rect x="110" y="80" width="60" height="4" rx="2" fill="#c7c7cc"></rect>
+	<rect x="110" y="88" width="50" height="4" rx="2" fill="#c7c7cc"></rect>
+	<rect x="110" y="106" width="140" height="10" rx="2" fill="#f5f5f7"></rect>
+	<g fill="#c7c7cc">
+		<rect x="116" y="124" width="64" height="4" rx="2"></rect>
+		<rect x="216" y="124" width="28" height="4" rx="2"></rect>
+		<rect x="116" y="136" width="52" height="4" rx="2"></rect>
+		<rect x="216" y="136" width="28" height="4" rx="2"></rect>
+		<rect x="116" y="148" width="70" height="4" rx="2"></rect>
+		<rect x="216" y="148" width="28" height="4" rx="2"></rect>
+	</g>
+	<rect x="110" y="162" width="140" height="1" fill="#e5e5ea"></rect>
+	<rect x="176" y="172" width="34" height="5" rx="2" fill="#86868b"></rect>
+	<rect x="216" y="171" width="34" height="7" rx="2" fill="#1d1d1f"></rect>
+	<rect x="110" y="190" width="110" height="4" rx="2" fill="#c7c7cc"></rect>
+	<rect x="110" y="206" width="120" height="6" rx="3" fill="#eaf3ff"></rect>
+	<rect x="114" y="208" width="60" height="2" rx="1" fill="#0066cc"></rect>
+	<!-- PDF badge -->
+	<g transform="translate(236 186)">
+		<rect width="44" height="24" rx="12" fill="#0066cc"></rect>
+		<text x="22" y="16" text-anchor="middle" font-family="Inter Variable, Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#fff" letter-spacing="0.5">PDF</text>
+	</g>
+</svg>

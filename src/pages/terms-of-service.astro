@@ -1,0 +1,121 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE } from '../lib/site';
+import { breadcrumb, webPage } from '../lib/schema';
+
+const title = 'Terms of Service';
+const description =
+	'Terms for using VendorDesk’s free browser tools. The tools are provided for estimation and layout purposes only; VendorDesk is not liable for manufacturing misprints or tax auditing errors.';
+const updated = '6 September 2026';
+
+const schema = [
+	webPage({ name: `${title} · ${SITE.name}`, path: '/terms-of-service', description }),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: 'Terms of Service', path: '/terms-of-service' },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema}>
+	<PageHeader
+		eyebrow="Legal"
+		title="Terms of Service"
+		lead="Plain-language terms for using VendorDesk. Please read the disclaimer in section 3 before relying on any output."
+		crumbs={[{ name: 'Home', href: '/' }, { name: 'Terms of Service' }]}
+	>
+		<p class="mt-6 text-caption text-ink-3">Last updated {updated}</p>
+	</PageHeader>
+
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<h2 class="mt-0!">1. Acceptance</h2>
+				<p>
+					By accessing or using {SITE.legalName} (“VendorDesk”, the “Site”) and any calculator, generator or other utility
+					made available on it (the “Tools”), you agree to these Terms of Service and to our
+					<a href="/privacy-policy">Privacy Policy</a>. If you do not agree, please do not use the Site.
+				</p>
+
+				<h2>2. The service</h2>
+				<p>
+					VendorDesk provides free, browser-based Tools that perform calculations and generate files — such as packaging
+					die-line drawings and Bill of Supply documents — from information you enter. The Tools run on your device; VendorDesk
+					does not receive, review or store your inputs or outputs.
+				</p>
+
+				<h2>3. Estimation and layout purposes only — disclaimer</h2>
+				<p class="callout">
+					<strong>The Tools are provided strictly for estimation, planning and layout purposes.</strong> Outputs are generated
+					from formulas and rules that are reasonable defaults but that cannot account for every material, machine, converter,
+					jurisdiction or individual circumstance. <strong>VendorDesk is not liable for manufacturing misprints, die-cutting or
+					tooling errors, wasted materials, or for tax auditing errors, penalties, interest or any other consequence</strong>
+					arising from the use of a document or drawing produced with the Tools.
+				</p>
+				<ul>
+					<li>
+						<strong>Packaging tools.</strong> Always produce and verify a physical mock-up and confirm allowances, bleed,
+						creasing and glue specifications with your printer or die-maker before ordering tooling or a production run.
+					</li>
+					<li>
+						<strong>Compliance and document tools.</strong> Nothing on the Site is legal, tax or accounting advice. Tax rules
+						change and depend on your registration status, turnover and the nature of each supply. You are solely responsible
+						for the accuracy and completeness of any document you issue, and you should confirm its suitability with a
+						qualified professional.
+					</li>
+				</ul>
+
+				<h2>4. Your responsibilities</h2>
+				<ul>
+					<li>You are responsible for the accuracy of the information you enter and for reviewing every output before you use it.</li>
+					<li>You must not use the Tools to create documents that are false, misleading or intended to deceive any person or authority.</li>
+					<li>You must not attempt to disrupt the Site, scrape it at abusive rates, or reverse-engineer it to build a competing service that misrepresents its origin.</li>
+				</ul>
+
+				<h2>5. Intellectual property</h2>
+				<p>
+					The Site, its design, text and code are owned by VendorDesk or its licensors. <strong>Files you generate with the
+					Tools — including SVG, PNG and PDF outputs — are yours</strong> to use for any lawful purpose, commercial or
+					otherwise, without attribution. You may not resell the Tools themselves or present them as your own.
+				</p>
+
+				<h2>6. Availability and changes</h2>
+				<p>
+					We aim to keep the Site available at all times but do not guarantee uninterrupted access. We may add, change or
+					retire Tools at any time. Because the Tools do not store your data, ensure you download any file you need at the
+					time you create it.
+				</p>
+
+				<h2>7. No warranty</h2>
+				<p>
+					The Site and the Tools are provided “as is” and “as available”, without warranties of any kind, whether express or
+					implied, including warranties of merchantability, fitness for a particular purpose, accuracy or non-infringement.
+				</p>
+
+				<h2>8. Limitation of liability</h2>
+				<p>
+					To the fullest extent permitted by law, VendorDesk and its operators shall not be liable for any indirect,
+					incidental, special, consequential or punitive damages, or for any loss of profits, revenue, data, goodwill or
+					materials, arising out of or related to your use of the Site or the Tools. Where liability cannot be excluded, it is
+					limited to INR 1,000 or the amount you paid to use the Tools (which is nil), whichever is greater.
+				</p>
+
+				<h2>9. Third-party links and advertising</h2>
+				<p>
+					The Site may contain links to third-party websites and may display third-party advertising. We are not responsible
+					for the content, products or practices of those third parties.
+				</p>
+
+				<h2>10. Governing law</h2>
+				<p>
+					These Terms are governed by the laws of India. Any dispute shall be subject to the exclusive jurisdiction of the
+					courts of India.
+				</p>
+
+				<h2>11. Contact</h2>
+				<p>Questions about these Terms: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+			</div>
+		</div>
+	</section>
+</Layout>

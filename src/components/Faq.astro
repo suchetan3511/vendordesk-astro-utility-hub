@@ -1,0 +1,32 @@
+---
+interface Props {
+	items: { question: string; answer: string }[];
+	/** Shared name makes the group behave as an exclusive accordion. */
+	name?: string;
+}
+const { items, name = 'faq' } = Astro.props;
+---
+
+<div class="border-y border-hairline">
+	{
+		items.map((item) => (
+			<details class="group border-b border-hairline last:border-b-0" name={name}>
+				<summary class="flex cursor-pointer items-center justify-between gap-6 py-5 text-[1.0625rem] font-semibold text-ink">
+					<span>{item.question}</span>
+					<span
+						aria-hidden="true"
+						class="grid size-8 shrink-0 place-items-center rounded-full border border-hairline text-ink-2 transition-transform duration-300 ease-(--ease-out-quart) group-open:rotate-45"
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+							<path d="M12 5v14M5 12h14" />
+						</svg>
+					</span>
+				</summary>
+				<div
+					class="max-w-prose pb-6 text-body text-ink-2 [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_strong]:font-semibold [&_strong]:text-ink"
+					set:html={item.answer}
+				/>
+			</details>
+		))
+	}
+</div>

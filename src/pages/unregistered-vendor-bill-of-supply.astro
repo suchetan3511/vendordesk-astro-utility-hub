@@ -1,0 +1,806 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { TOOLS } from '../lib/site';
+import { breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { ITEM_UNITS, STATES } from '../lib/india';
+
+const tool = TOOLS[1];
+const title = 'Bill of Supply Generator — Free GST-Compliant PDF';
+const description =
+	'Create a GST-compliant Bill of Supply in your browser and download it as a PDF. For unregistered vendors, freelancers and composition dealers — Rule 49 fields, amount in words, no sign-up.';
+
+const faqs = [
+	{
+		question: 'What is the difference between a Bill of Supply and a Tax Invoice?',
+		answer:
+			'A <strong>Tax Invoice</strong> is issued by a registered person for taxable supplies and shows the GST charged (CGST/SGST or IGST), which the buyer can claim as input tax credit. A <strong>Bill of Supply</strong> is issued where no tax may be charged — by composition dealers, for exempt or nil-rated supplies, and in practice by unregistered vendors — so it carries no tax column and gives the buyer no credit.',
+	},
+	{
+		question: 'Can an unregistered vendor issue a Bill of Supply?',
+		answer:
+			'Strictly, the CGST Rules define the “bill of supply” for registered persons. An unregistered vendor (turnover below the ₹40 lakh goods / ₹20 lakh services threshold, lower in special-category states) cannot charge GST at all and issues a plain bill without tax. This generator produces exactly that format: no GSTIN, no tax column and a clear statement that the supplier is not registered under GST.',
+	},
+	{
+		question: 'What must a composition dealer write on a Bill of Supply?',
+		answer:
+			'The words <strong>“Composition taxable person, not eligible to collect tax on supplies”</strong> must appear at the top of every bill of supply, and the dealer’s GSTIN must be shown. The generator adds both automatically when you select “Composition dealer”.',
+	},
+	{
+		question: 'Is a Bill of Supply required for small amounts?',
+		answer:
+			'Under Rule 49 read with Rule 46, a registered person need not issue a bill of supply where the value is less than ₹200 and the recipient is unregistered and does not ask for one — provided a consolidated bill of supply is prepared at the end of each day for all such supplies.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description }),
+	softwareApplication({
+		name: tool.name,
+		path: tool.href,
+		description,
+		category: 'BusinessApplication',
+		features: [
+			'Unregistered vendor and composition dealer modes',
+			'Mandatory composition declaration and GSTIN',
+			'Multiple line items with HSN/SAC, quantity, unit and rate',
+			'Discount and round-off',
+			'Amount in words in the Indian numbering system',
+			'Inter-state supply warnings',
+			'A4 PDF download generated in the browser',
+			'Drafts stored only on your device',
+		],
+		keywords: tool.keywords,
+	}),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema}>
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">GST compliance · Free · No sign-up</p>
+				<h1 class="mt-3 text-display text-ink">Bill of Supply Generator</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					For unregistered vendors, freelancers and composition dealers who cannot charge GST. Fill in the details, watch the
+					A4 document build itself, and download a PDF — nothing is uploaded, ever.
+				</p>
+			</div>
+			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Highlights">
+				<li class="chip">Rule 49 fields</li>
+				<li class="chip">Composition declaration</li>
+				<li class="chip">Amount in words</li>
+				<li class="chip">A4 PDF</li>
+				<li class="chip">Drafts stay on your device</li>
+			</ul>
+		</div>
+	</section>
+
+	<section id="tool" class="bg-parchment pb-24 lg:pb-0" aria-labelledby="tool-heading">
+		<h2 id="tool-heading" class="sr-only">Bill of Supply form and preview</h2>
+		<div class="mx-auto grid max-w-page gap-6 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:items-start" data-bos-tool>
+			<!-- Form -->
+			<form class="card grid gap-8 p-5 sm:p-6" data-bos-form novalidate autocomplete="on">
+				<!-- Supplier -->
+				<fieldset class="grid gap-4">
+					<legend class="text-[1.0625rem] font-semibold text-ink">1. Your business (supplier)</legend>
+					<div>
+						<p class="field-label">Registration status</p>
+						<div class="grid gap-2 sm:grid-cols-2">
+							<button type="button" data-supplier-type="unregistered" class="option-card" aria-pressed="true">
+								<span class="text-caption font-semibold text-ink">Not registered under GST</span>
+								<span class="text-fine text-ink-2">Below the threshold. No GSTIN, no tax charged.</span>
+							</button>
+							<button type="button" data-supplier-type="composition" class="option-card" aria-pressed="false">
+								<span class="text-caption font-semibold text-ink">Composition dealer</span>
+								<span class="text-fine text-ink-2">Registered under Section 10. GSTIN required.</span>
+							</button>
+						</div>
+					</div>
+					<div>
+						<label for="supplier-name" class="field-label">Business / trade name</label>
+						<input id="supplier-name" name="supplier.name" type="text" class="field" placeholder="e.g. Meera Design Studio" autocomplete="organization" />
+					</div>
+					<div>
+						<label for="supplier-address" class="field-label">Address</label>
+						<textarea id="supplier-address" name="supplier.address" rows="2" class="field" placeholder="Street, city, PIN" autocomplete="street-address"></textarea>
+					</div>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="supplier-state" class="field-label">State</label>
+							<select id="supplier-state" name="supplier.stateCode" class="field">
+								{STATES.map((s) => <option value={s.code}>{s.name} ({s.code})</option>)}
+							</select>
+						</div>
+						<div data-gstin-field hidden>
+							<label for="supplier-gstin" class="field-label">GSTIN</label>
+							<input id="supplier-gstin" name="supplier.gstin" type="text" class="field font-mono uppercase" maxlength="15" placeholder="27ABCDE1234F1Z5" spellcheck="false" />
+						</div>
+						<div>
+							<label for="supplier-pan" class="field-label">PAN <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="supplier-pan" name="supplier.pan" type="text" class="field font-mono uppercase" maxlength="10" placeholder="ABCDE1234F" spellcheck="false" />
+						</div>
+						<div>
+							<label for="supplier-phone" class="field-label">Phone <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="supplier-phone" name="supplier.phone" type="tel" class="field" placeholder="+91 98765 43210" autocomplete="tel" />
+						</div>
+						<div class="sm:col-span-2">
+							<label for="supplier-email" class="field-label">Email <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="supplier-email" name="supplier.email" type="email" class="field" placeholder="you@example.com" autocomplete="email" />
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Bill details -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">2. Bill details</legend>
+					<div class="clear-both grid gap-4 sm:grid-cols-3">
+						<div>
+							<label for="bill-number" class="field-label">Bill number</label>
+							<input id="bill-number" name="bill.number" type="text" class="field tnum" placeholder="BOS/2026-27/001" spellcheck="false" autocomplete="off" />
+						</div>
+						<div>
+							<label for="bill-date" class="field-label">Date</label>
+							<input id="bill-date" name="bill.date" type="date" class="field tnum" />
+						</div>
+						<div>
+							<label for="bill-pos" class="field-label">Place of supply</label>
+							<select id="bill-pos" name="bill.placeOfSupply" class="field">
+								{STATES.map((s) => <option value={s.code}>{s.name} ({s.code})</option>)}
+							</select>
+						</div>
+					</div>
+					<p class="field-hint">Serial numbers must be unique within a financial year and no longer than 16 characters.</p>
+				</fieldset>
+
+				<!-- Recipient -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">3. Bill to (recipient)</legend>
+					<div class="clear-both">
+						<label for="recipient-name" class="field-label">Name</label>
+						<input id="recipient-name" name="recipient.name" type="text" class="field" placeholder="Client or company name" />
+					</div>
+					<div>
+						<label for="recipient-address" class="field-label">Address</label>
+						<textarea id="recipient-address" name="recipient.address" rows="2" class="field" placeholder="Street, city, PIN"></textarea>
+					</div>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="recipient-state" class="field-label">State</label>
+							<select id="recipient-state" name="recipient.stateCode" class="field">
+								{STATES.map((s) => <option value={s.code}>{s.name} ({s.code})</option>)}
+							</select>
+						</div>
+						<div>
+							<label for="recipient-gstin" class="field-label">Recipient GSTIN <span class="font-normal text-ink-3">(if registered)</span></label>
+							<input id="recipient-gstin" name="recipient.gstin" type="text" class="field font-mono uppercase" maxlength="15" placeholder="Optional" spellcheck="false" />
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Items -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">4. Items</legend>
+					<div class="clear-both grid gap-3" data-items></div>
+					<button type="button" data-add-item class="btn btn-ghost btn-sm justify-self-start">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+						Add item
+					</button>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="discount" class="field-label">Discount (₹) <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="discount" name="discount" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
+						</div>
+						<label class="flex min-h-11 items-center gap-3 self-end text-caption text-ink">
+							<input name="roundOff" type="checkbox" class="size-5 accent-primary" />
+							Round total to the nearest rupee
+						</label>
+					</div>
+				</fieldset>
+
+				<!-- Notes & bank -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">5. Notes &amp; payment</legend>
+					<div class="clear-both">
+						<label for="notes" class="field-label">Notes / terms</label>
+						<textarea id="notes" name="notes" rows="2" class="field"></textarea>
+					</div>
+					<details class="group rounded-md border border-hairline bg-parchment">
+						<summary class="flex min-h-11 cursor-pointer items-center justify-between px-4 text-caption font-semibold text-ink">
+							Bank / UPI details (optional)
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="transition-transform group-open:rotate-180"><path d="M6 9l6 6 6-6"></path></svg>
+						</summary>
+						<div class="grid gap-3 border-t border-hairline px-4 py-4 sm:grid-cols-2">
+							<div>
+								<label for="bank-name" class="text-fine font-semibold text-ink-2">Account name</label>
+								<input id="bank-name" name="bank.accountName" type="text" class="field mt-1" />
+							</div>
+							<div>
+								<label for="bank-number" class="text-fine font-semibold text-ink-2">Account number</label>
+								<input id="bank-number" name="bank.accountNumber" type="text" inputmode="numeric" class="field tnum mt-1" />
+							</div>
+							<div>
+								<label for="bank-ifsc" class="text-fine font-semibold text-ink-2">IFSC</label>
+								<input id="bank-ifsc" name="bank.ifsc" type="text" class="field mt-1 font-mono uppercase" maxlength="11" spellcheck="false" autocomplete="off" />
+							</div>
+							<div>
+								<label for="bank-upi" class="text-fine font-semibold text-ink-2">UPI ID</label>
+								<input id="bank-upi" name="bank.upi" type="text" class="field mt-1" placeholder="name@bank" spellcheck="false" autocapitalize="none" autocomplete="off" />
+							</div>
+						</div>
+					</details>
+				</fieldset>
+
+				<div class="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-5">
+					<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
+						<input name="keepDraft" type="checkbox" class="size-5 accent-primary" />
+						Keep a draft in this browser
+					</label>
+					<button type="button" data-clear-draft class="text-caption text-ink-2 underline decoration-hairline-strong underline-offset-4 hover:text-ink">Clear draft &amp; reset</button>
+				</div>
+				<p class="-mt-4 text-fine text-ink-3">Drafts are stored only in your browser’s local storage. Nothing is sent to VendorDesk.</p>
+			</form>
+
+			<!-- Preview -->
+			<div class="grid gap-4 lg:sticky lg:top-20">
+				<div class="card overflow-hidden">
+					<div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 sm:px-5">
+						<h3 class="text-[1.0625rem] font-semibold">Document preview</h3>
+						<p class="tnum text-caption text-ink-2">Total <span class="font-semibold text-ink" data-out="total">₹0.00</span></p>
+					</div>
+					<div id="doc-viewport" class="overflow-hidden bg-parchment p-3 sm:p-6">
+						<div id="doc-scaler" class="origin-top-left">
+							<!-- A4 document. Plain CSS with hex colours only: html2canvas cannot parse modern colour functions. -->
+							<div id="bos-document" class="bos">
+								<header class="bos-header bos-block">
+									<div>
+										<h2 class="bos-title">Bill of Supply</h2>
+										<p class="bos-subtitle">Not a tax invoice · No GST charged on this supply</p>
+										<p class="bos-declaration" data-doc="declaration"></p>
+									</div>
+									<table class="bos-meta">
+										<tbody>
+											<tr><th>Bill No.</th><td data-doc="bill.number"></td></tr>
+											<tr><th>Date</th><td data-doc="bill.date"></td></tr>
+											<tr><th>Place of supply</th><td data-doc="bill.placeOfSupply"></td></tr>
+										</tbody>
+									</table>
+								</header>
+
+								<section class="bos-parties bos-block">
+									<div class="bos-party">
+										<h3>From</h3>
+										<p class="bos-name" data-doc="supplier.name"></p>
+										<p class="bos-pre" data-doc="supplier.address"></p>
+										<p data-doc="supplier.stateLine"></p>
+										<p data-doc="supplier.gstin"></p>
+										<p data-doc="supplier.pan"></p>
+										<p data-doc="supplier.contact"></p>
+									</div>
+									<div class="bos-party">
+										<h3>Bill to</h3>
+										<p class="bos-name" data-doc="recipient.name"></p>
+										<p class="bos-pre" data-doc="recipient.address"></p>
+										<p data-doc="recipient.stateLine"></p>
+										<p data-doc="recipient.gstin"></p>
+									</div>
+								</section>
+
+								<table class="bos-items">
+									<thead>
+										<tr>
+											<th>#</th>
+											<th class="desc">Description</th>
+											<th>HSN / SAC</th>
+											<th class="num">Qty</th>
+											<th class="num">Rate</th>
+											<th class="num">Amount</th>
+										</tr>
+									</thead>
+									<tbody data-doc-items></tbody>
+								</table>
+
+								<section class="bos-totals bos-block">
+									<table>
+										<tbody>
+											<tr><th>Subtotal</th><td data-doc="subtotal"></td></tr>
+											<tr data-doc-row="discount" hidden><th>Discount</th><td data-doc="discount"></td></tr>
+											<tr data-doc-row="roundOff" hidden><th>Round off</th><td data-doc="roundOff"></td></tr>
+											<tr class="bos-total"><th>Total</th><td data-doc="total"></td></tr>
+										</tbody>
+									</table>
+								</section>
+								<p class="bos-words bos-block"><span>Amount in words:</span> <strong data-doc="words"></strong></p>
+
+								<section class="bos-footer bos-block">
+									<div class="bos-notes">
+										<h4>Notes</h4>
+										<p class="bos-pre" data-doc="notes"></p>
+										<div data-doc-block="bank" hidden>
+											<h4>Payment details</h4>
+											<p class="bos-pre" data-doc="bank"></p>
+										</div>
+									</div>
+									<div class="bos-sign">
+										<p data-doc="signatory"></p>
+										<div class="bos-sign-line"></div>
+										<p>Authorised signatory</p>
+									</div>
+								</section>
+								<p class="bos-fine">This is a Bill of Supply under the CGST Rules, 2017. No input tax credit is available on this document. Generated with vendordesk.tools</p>
+							</div>
+						</div>
+					</div>
+					<div class="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-3 sm:px-5">
+						<button type="button" data-download-pdf class="btn btn-primary btn-sm">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"></path></svg>
+							Download PDF
+						</button>
+						<button type="button" data-print class="btn btn-ghost btn-sm">Print</button>
+						<p id="bos-status" class="ml-auto text-fine text-ink-2" role="status" aria-live="polite"></p>
+					</div>
+				</div>
+
+				<div class="card p-5 sm:p-6">
+					<p class="eyebrow">Compliance check</p>
+					<div id="readiness" class="mt-3 grid gap-2 text-caption [&>p]:rounded-md [&>p]:border [&>p]:px-3.5 [&>p]:py-2.5 [&>p[data-kind=ok]]:border-success/40 [&>p[data-kind=ok]]:text-success [&>p[data-kind=missing]]:border-hairline [&>p[data-kind=missing]]:text-ink-2 [&>p[data-kind=warn]]:border-danger/40 [&>p[data-kind=warn]]:text-danger" aria-live="polite"></div>
+					<p id="bos-dynamic" class="mt-4 text-caption text-ink-2"></p>
+				</div>
+			</div>
+
+			<!-- Mobile action bar (fixed; lives inside the tool root so the script can bind it) -->
+			<div class="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-parchment/90 px-5 py-3 backdrop-blur-xl lg:hidden" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+				<div class="mx-auto flex max-w-page items-center justify-between gap-4">
+					<p class="tnum text-caption text-ink-2">Total <span class="text-[1.0625rem] font-semibold text-ink" data-out="total">₹0.00</span></p>
+					<button type="button" data-download-pdf class="btn btn-primary btn-sm">Download PDF</button>
+				</div>
+			</div>
+
+			<!-- Item row template -->
+			<template id="item-row-template">
+			<div data-item-row class="grid gap-2 rounded-md border border-hairline bg-parchment p-3">
+				<div class="flex items-center justify-between">
+					<span class="text-fine font-semibold text-ink-2">Item <span data-item-index>1</span></span>
+					<button type="button" data-remove-item class="press inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-fine text-ink-2 hover:text-danger disabled:opacity-40" aria-label="Remove item">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+						Remove
+					</button>
+				</div>
+				<div>
+					<label data-for="description" class="sr-only">Description</label>
+					<input data-item-field="description" type="text" class="field" placeholder="Description of goods or services" />
+				</div>
+				<div class="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_0.8fr_0.9fr_1fr]">
+					<div>
+						<label data-for="hsn" class="text-fine text-ink-2">HSN / SAC</label>
+						<input data-item-field="hsn" type="text" class="field tnum mt-1" placeholder="Optional" />
+					</div>
+					<div>
+						<label data-for="qty" class="text-fine text-ink-2">Qty</label>
+						<input data-item-field="qty" type="number" inputmode="decimal" min="0" step="any" class="field tnum mt-1" />
+					</div>
+					<div>
+						<label data-for="unit" class="text-fine text-ink-2">Unit</label>
+						<select data-item-field="unit" class="field mt-1">
+							{ITEM_UNITS.map((u) => <option value={u}>{u}</option>)}
+						</select>
+					</div>
+					<div>
+						<label data-for="rate" class="text-fine text-ink-2">Rate (₹)</label>
+						<input data-item-field="rate" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum mt-1" placeholder="0.00" />
+					</div>
+				</div>
+				<p class="tnum text-right text-caption text-ink-2">Amount <span class="font-semibold text-ink" data-item-amount>₹0.00</span></p>
+			</div>
+		</template>
+		</div>
+	</section>
+
+	<!-- Editorial content -->
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<p class="eyebrow">The rules, explained</p>
+				<h2 class="mt-3!">When must an Indian business issue a Bill of Supply instead of a Tax Invoice?</h2>
+				<p class="lede">
+					Under the GST law, the document you hand to a customer tells them — and the tax department — whether tax was charged
+					and whether they can claim credit for it. Choosing the wrong one is one of the most common compliance slips small
+					suppliers make. Here is where the line falls.
+				</p>
+
+				<h3>What a Bill of Supply is</h3>
+				<p>
+					Section 31(3)(c) of the CGST Act, 2017 requires a registered person who is supplying exempted goods or services, or who
+					is paying tax under the composition scheme, to issue a <strong>bill of supply</strong> instead of a tax invoice. Rule 49
+					of the CGST Rules then prescribes what that document must contain. The defining feature is simple: a bill of supply
+					<strong>shows no tax</strong>. There is no CGST, SGST or IGST column, no tax rate and no tax amount, and the recipient
+					cannot claim any input tax credit against it.
+				</p>
+
+				<h3>Tax Invoice vs. Bill of Supply at a glance</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr><th>Point</th><th>Tax Invoice</th><th>Bill of Supply</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>Issued for</td><td>Taxable supplies by a regular registered person</td><td>Exempt, nil-rated or non-taxable supplies; all supplies by composition dealers; supplies by unregistered persons (as a plain bill)</td></tr>
+							<tr><td>Tax shown</td><td>Yes — rate and amount of CGST/SGST or IGST</td><td>No tax column at all</td></tr>
+							<tr><td>Input tax credit for buyer</td><td>Available if conditions are met</td><td>Not available</td></tr>
+							<tr><td>Governing rule</td><td>Rule 46</td><td>Rule 49</td></tr>
+							<tr><td>Mandatory declaration</td><td>None specific</td><td>Composition dealers: “Composition taxable person, not eligible to collect tax on supplies”</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h2>The three situations that call for a Bill of Supply</h2>
+				<h3>1. You are a composition dealer</h3>
+				<p>
+					The composition scheme under Section 10 lets small businesses — manufacturers, traders and restaurants with aggregate
+					turnover up to ₹1.5 crore (₹75 lakh in certain special-category states), and service providers up to ₹50 lakh under
+					Section 10(2A) — pay GST at a flat rate on their own turnover instead of on each sale. In exchange, they
+					<strong>may not collect tax from customers</strong> and may not claim input tax credit. Every sale they make must
+					therefore be documented on a bill of supply, with their GSTIN and the prescribed declaration printed at the top.
+					Composition dealers are also barred from making inter-state outward supplies of goods, which is why the generator
+					warns you if the place of supply is in a different state.
+				</p>
+
+				<h3>2. You are supplying exempt or nil-rated goods or services</h3>
+				<p>
+					A regular registered person selling fresh produce, unbranded grains, educational or healthcare services, or anything
+					else that is exempt or attracts a nil rate, has nothing to charge and must issue a bill of supply for those items. If a
+					single sale mixes taxable and exempt items and the buyer is unregistered, Rule 46A allows one combined
+					<strong>“invoice-cum-bill of supply”</strong>.
+				</p>
+
+				<h3>3. You are not registered under GST at all</h3>
+				<p>
+					Freelancers, home businesses and small retail suppliers whose aggregate turnover is below the registration threshold —
+					₹40 lakh for goods and ₹20 lakh for services in most states, halved in special-category states — are not required to
+					register. An unregistered person <strong>cannot charge GST under any circumstances</strong>; collecting tax without
+					registration is an offence under Section 32. The GST Rules technically define the bill of supply for registered
+					persons, so what an unregistered vendor issues is a plain bill that behaves exactly like one: no GSTIN, no tax, and a
+					clear note that the supplier is unregistered. That is what this generator produces in “Not registered” mode, and it
+					is what most customers, accountants and marketplaces expect to see.
+				</p>
+
+				<h2>What Rule 49 says the document must contain</h2>
+				<ol>
+					<li>Name, address and GSTIN of the supplier (GSTIN not applicable to unregistered vendors).</li>
+					<li>A consecutive serial number, unique for the financial year, of up to 16 characters (letters, numerals, hyphens and slashes).</li>
+					<li>Date of issue.</li>
+					<li>Name, address and GSTIN or UIN of the recipient, if registered.</li>
+					<li>HSN code for goods or SAC for services, to the extent required for your turnover band.</li>
+					<li>Description of the goods or services.</li>
+					<li>Value of the supply, taking into account any discount or abatement.</li>
+					<li>Signature or digital signature of the supplier or an authorised representative.</li>
+				</ol>
+				<p>
+					The generator lays out every one of these fields, adds the place of supply (useful for inter-state checks and for
+					your own records), and writes the total in words using the Indian lakh-and-crore system so the figure cannot be
+					misread.
+				</p>
+
+				<h2>Small-value supplies and the ₹200 rule</h2>
+				<p>
+					Rule 49 borrows the relaxations in Rule 46: a registered person need not issue a bill of supply where the value of the
+					supply is <strong>less than ₹200</strong>, the recipient is not registered and does not ask for one — provided a
+					consolidated bill of supply is issued at the close of each day covering all such sales. A document issued under any
+					other law (for example a receipt under a state VAT law for alcohol) is treated as a bill of supply for GST purposes.
+				</p>
+
+				<h2>Mistakes to avoid</h2>
+				<ul>
+					<li><strong>Titling it “Tax Invoice”.</strong> The heading itself signals that tax was charged. Use “Bill of Supply”.</li>
+					<li><strong>Adding a GST line while unregistered.</strong> Even a “0%” line invites questions; leave tax out entirely.</li>
+					<li><strong>Dropping the composition declaration.</strong> It is mandatory on every bill a composition dealer issues.</li>
+					<li><strong>Restarting serial numbers mid-year.</strong> Serial numbers must run consecutively through the financial year.</li>
+					<li><strong>Inter-state sales under composition.</strong> Not permitted for goods; check before you ship across a border.</li>
+					<li><strong>Losing the copy.</strong> Section 36 requires records to be kept for 72 months from the due date of the annual return for that year — download and file every PDF.</li>
+				</ul>
+
+				<p class="callout">
+					This page is general information, not tax advice. Thresholds and rules change; confirm your position with a chartered
+					accountant or GST practitioner before issuing documents. VendorDesk is not liable for tax auditing errors — see our
+					<a href="/terms-of-service">terms of service</a>.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title">Bill of Supply questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="bos-faq" />
+			</div>
+		</div>
+	</section>
+
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Printing packaging for the same client?</h2>
+				<p class="mt-2 text-body text-on-tile-2">Generate a real-scale paper bag die-line with material-aware bleed in seconds.</p>
+			</div>
+			<a href={TOOLS[0].href} class="btn btn-primary shrink-0">Open the die-line generator</a>
+		</div>
+	</section>
+</Layout>
+
+<style is:global>
+	/* A4 document — hex colours only so html2canvas can rasterise it faithfully in any theme. */
+	.bos {
+		width: 794px;
+		min-height: 1120px;
+		box-sizing: border-box;
+		padding: 56px 56px 48px;
+		background: #ffffff;
+		color: #1d1d1f;
+		font-family: 'Inter Variable', Inter, Helvetica, Arial, sans-serif;
+		font-size: 13px;
+		line-height: 1.45;
+		letter-spacing: -0.005em;
+		display: flex;
+		flex-direction: column;
+	}
+	.bos * {
+		box-sizing: border-box;
+	}
+	.bos [hidden] {
+		display: none !important;
+	}
+	.bos-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 32px;
+		padding-bottom: 20px;
+		border-bottom: 1.5px solid #1d1d1f;
+	}
+	.bos-title {
+		margin: 0;
+		font-size: 28px;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		line-height: 1.1;
+	}
+	.bos-subtitle {
+		margin: 6px 0 0;
+		color: #6e6e73;
+		font-size: 12px;
+	}
+	.bos-declaration {
+		margin: 12px 0 0;
+		padding: 6px 10px;
+		border: 1px solid #d2d2d7;
+		border-radius: 6px;
+		font-size: 11.5px;
+		font-weight: 600;
+		color: #1d1d1f;
+		background: #f5f5f7;
+		max-width: 380px;
+	}
+	.bos-meta {
+		border-collapse: collapse;
+		flex-shrink: 0;
+	}
+	.bos-meta th,
+	.bos-meta td {
+		padding: 3px 0 3px 18px;
+		text-align: left;
+		vertical-align: top;
+		white-space: nowrap;
+	}
+	.bos-meta th {
+		color: #6e6e73;
+		font-weight: 500;
+		padding-left: 0;
+	}
+	.bos-meta td {
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+	.bos-parties {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 32px;
+		padding: 20px 0;
+	}
+	.bos-party h3 {
+		margin: 0 0 6px;
+		font-size: 10.5px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #6e6e73;
+	}
+	.bos-party p {
+		margin: 0 0 2px;
+		color: #1d1d1f;
+	}
+	.bos-name {
+		font-size: 15px;
+		font-weight: 600;
+	}
+	.bos-pre {
+		white-space: pre-line;
+	}
+	.bos-items {
+		width: 100%;
+		border-collapse: collapse;
+		margin-top: 4px;
+	}
+	.bos-items th {
+		text-align: left;
+		font-size: 10.5px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #6e6e73;
+		padding: 8px 8px;
+		border-top: 1px solid #1d1d1f;
+		border-bottom: 1px solid #d2d2d7;
+		background: #fafafc;
+	}
+	.bos-items td {
+		padding: 9px 8px;
+		border-bottom: 1px solid #e5e5ea;
+		vertical-align: top;
+	}
+	.bos-items td:first-child,
+	.bos-items th:first-child {
+		width: 28px;
+		color: #86868b;
+		padding-left: 4px;
+	}
+	.bos-items .desc {
+		width: auto;
+	}
+	.bos-items .num {
+		text-align: right;
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+	.bos-totals {
+		display: flex;
+		justify-content: flex-end;
+		padding-top: 12px;
+	}
+	.bos-totals table {
+		border-collapse: collapse;
+		min-width: 280px;
+	}
+	.bos-totals th,
+	.bos-totals td {
+		padding: 5px 8px;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+	.bos-totals th {
+		color: #6e6e73;
+		font-weight: 500;
+	}
+	.bos-totals .bos-total th,
+	.bos-totals .bos-total td {
+		border-top: 1.5px solid #1d1d1f;
+		font-size: 16px;
+		font-weight: 600;
+		color: #1d1d1f;
+		padding-top: 8px;
+	}
+	.bos-words {
+		margin: 10px 0 0;
+		padding: 10px 12px;
+		border-radius: 6px;
+		background: #f5f5f7;
+		font-size: 12.5px;
+	}
+	.bos-words span {
+		color: #6e6e73;
+	}
+	.bos-footer {
+		margin-top: auto;
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 32px;
+		padding-top: 28px;
+	}
+	.bos-footer h4 {
+		margin: 0 0 4px;
+		font-size: 10.5px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #6e6e73;
+	}
+	.bos-footer p {
+		margin: 0;
+		font-size: 12px;
+		color: #1d1d1f;
+	}
+	.bos-notes > div {
+		margin-top: 12px;
+	}
+	.bos-sign {
+		text-align: right;
+		align-self: end;
+	}
+	.bos-sign p:first-child {
+		font-weight: 600;
+	}
+	.bos-sign-line {
+		height: 56px;
+		border-bottom: 1px solid #1d1d1f;
+		margin-bottom: 6px;
+	}
+	.bos-fine {
+		margin: 24px 0 0;
+		font-size: 9.5px;
+		color: #86868b;
+	}
+	@media print {
+		body > * {
+			display: none !important;
+		}
+		body > main {
+			display: block !important;
+		}
+		main > * {
+			display: none !important;
+		}
+		main > #tool {
+			display: block !important;
+			background: #fff !important;
+			padding: 0 !important;
+		}
+		#tool > * {
+			display: none !important;
+		}
+		#tool > [data-bos-tool] {
+			display: block !important;
+			padding: 0 !important;
+		}
+		[data-bos-tool] > form,
+		[data-bos-tool] .card > :not(#doc-viewport),
+		[data-bos-tool] .card + .card {
+			display: none !important;
+		}
+		[data-bos-tool] .card {
+			border: 0 !important;
+			border-radius: 0 !important;
+		}
+		#doc-viewport {
+			padding: 0 !important;
+			background: #fff !important;
+			overflow: visible !important;
+		}
+		#doc-scaler {
+			transform: none !important;
+			height: auto !important;
+		}
+		.bos {
+			width: 100%;
+			min-height: 0;
+			padding: 0;
+		}
+		@page {
+			size: A4;
+			margin: 14mm;
+		}
+	}
+</style>
+
+<script>
+	import { initBillOfSupplyTool } from '../scripts/bill-of-supply';
+	const root = document.querySelector<HTMLElement>('[data-bos-tool]');
+	if (root) initBillOfSupplyTool(root);
+</script>
