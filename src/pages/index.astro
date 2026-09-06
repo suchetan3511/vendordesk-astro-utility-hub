@@ -4,8 +4,8 @@ import ToolCard from '../components/ToolCard.astro';
 import Faq from '../components/Faq.astro';
 import DielineArt from '../components/art/DielineArt.astro';
 import BillArt from '../components/art/BillArt.astro';
-import { SITE, TOOLS } from '../lib/site';
-import { organization, website, webPage } from '../lib/schema';
+import { BILL, DIELINE, SITE, TOOLS } from '../lib/site';
+import { itemList, webPage } from '../lib/schema';
 
 const title = 'Free Bill of Supply & Dieline Generators — VendorDesk';
 const description = SITE.description;
@@ -29,16 +29,16 @@ const principles = [
 ];
 
 const steps = [
-	{ title: 'Type your numbers', body: 'Bag dimensions or bill details — a handful of fields, sensible defaults, presets for the common cases.' },
-	{ title: 'Watch it update live', body: 'The die-line preview, sheet math and document redraw as you type. No “calculate” button, no page reloads.' },
-	{ title: 'Download and go', body: 'Real-scale SVG and PNG for the die-line; an A4 PDF for the bill. Files are generated on the spot.' },
+	{ title: 'Type your details', body: 'Bill lines or bag dimensions — a handful of fields, sensible defaults, presets for the common cases.' },
+	{ title: 'Watch it update live', body: 'The document, die-line preview and sheet math redraw as you type. No “calculate” button, no page reloads.' },
+	{ title: 'Download and go', body: 'An A4 PDF for the bill; real-scale SVG and PNG for the die-line. Files are generated on the spot.' },
 ];
 
 const audiences = [
-	{ title: 'Digital designers', body: 'Structural templates at 1:1 scale, ready for Illustrator, Affinity or Inkscape.' },
-	{ title: 'Packaging manufacturers', body: 'Material-aware allowances and parent-sheet yield to quote jobs faster.' },
 	{ title: 'Freelancers & consultants', body: 'A clean Bill of Supply when you are below the GST threshold or under composition.' },
 	{ title: 'Retail suppliers', body: 'Correctly worded documents for exempt goods and composition-scheme sales.' },
+	{ title: 'Digital designers', body: 'Structural templates at 1:1 scale, ready for Illustrator, Affinity or Inkscape.' },
+	{ title: 'Packaging manufacturers', body: 'Material-aware allowances and parent-sheet yield to quote jobs faster.' },
 ];
 
 const faqs = [
@@ -69,9 +69,18 @@ const faqs = [
 ];
 
 const schema = [
-	website(),
-	organization(),
-	webPage({ name: title, path: '/', description, type: 'CollectionPage' }),
+	webPage({
+		name: title,
+		path: '/',
+		description,
+		type: 'CollectionPage',
+		mainEntity: `${SITE.url}/#tools`,
+	}),
+	itemList({
+		path: '/',
+		name: 'Free VendorDesk tools',
+		items: TOOLS.map((t) => ({ name: t.name, path: t.href, description: t.description })),
+	}),
 ];
 ---
 
@@ -79,10 +88,12 @@ const schema = [
 	<!-- Hero -->
 	<section class="relative overflow-hidden bg-canvas">
 		<div class="mx-auto grid max-w-page items-center gap-12 px-5 pt-14 pb-16 sm:px-8 sm:pt-20 sm:pb-24 lg:grid-cols-[1.2fr_1fr] lg:gap-14 lg:pt-24 lg:pb-28">
-			<div class="max-w-2xl">
+			{/* `min-w-0` lets these grid items shrink below their content's intrinsic width —
+			    without it the illustration's intrinsic size sets a floor that overflows narrow phones. */}
+			<div class="min-w-0 max-w-2xl">
 				<p class="eyebrow animate-fade-up">Free · No sign-up · Runs entirely in your browser</p>
 				<h1 class="mt-4 text-hero text-ink animate-fade-up" style="animation-delay: 80ms">
-					Lightning‑fast bill and dieline generators for independent&nbsp;businesses.
+					Lightning‑fast bill and dieline generators for independent businesses.
 				</h1>
 				<p class="mt-6 max-w-xl text-lead text-ink-2 animate-fade-up" style="animation-delay: 160ms">
 					Two free online tools that do one job perfectly: a <strong class="font-semibold text-ink">bill of supply
@@ -91,14 +102,14 @@ const schema = [
 					day.
 				</p>
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-up" style="animation-delay: 240ms">
-					<a href={TOOLS[0].href} class="btn btn-primary btn-lg">Generate a bag dieline</a>
-					<a href={TOOLS[1].href} class="btn btn-secondary btn-lg">Create a Bill of Supply</a>
+					<a href={BILL.href} class="btn btn-primary btn-lg">Create a Bill of Supply</a>
+					<a href={DIELINE.href} class="btn btn-secondary btn-lg">Generate a bag dieline</a>
 				</div>
-				<ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-caption text-ink-2 animate-fade-up" style="animation-delay: 320ms">
+				<ul class="mt-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-2.5 text-caption text-ink-2 animate-fade-up" style="animation-delay: 320ms">
 					{
 						['No account', 'Nothing uploaded', 'Real-scale exports', 'Light & dark mode'].map((item) => (
 							<li class="flex items-center gap-2">
-								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-success">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0 text-success">
 									<path d="M5 12.5l4.5 4.5L19 7.5" />
 								</svg>
 								{item}
@@ -108,16 +119,16 @@ const schema = [
 				</ul>
 			</div>
 
-			<div class="relative animate-fade-up" style="animation-delay: 200ms">
-				<div class="relative rounded-xl border border-hairline bg-parchment p-4 sm:p-8">
-					<div class="rounded-lg bg-paper p-3 shadow-product sm:p-5">
-						<DielineArt animate class="h-auto w-full" />
+			<div class="relative min-w-0 animate-fade-up" style="animation-delay: 200ms">
+				<div class="relative rounded-xl border border-hairline bg-surface p-4 sm:p-8">
+					<div class="rounded-lg bg-parchment p-4 sm:p-6">
+						<BillArt animate class="mx-auto h-auto w-full" />
 					</div>
 					<div class="pointer-events-none absolute top-6 left-6 hidden rounded-full border border-hairline bg-surface px-3 py-1.5 text-fine font-semibold text-ink-2 sm:block">
-						250 × 350 × 100 mm · Luxury · Art paper
+						Composition dealer · Rule 49 format
 					</div>
 					<div class="pointer-events-none absolute right-6 bottom-6 hidden rounded-full bg-primary px-3 py-1.5 text-fine font-semibold text-on-primary sm:block">
-						SVG · 1:1 scale
+						A4 PDF · Free
 					</div>
 				</div>
 			</div>
@@ -135,12 +146,12 @@ const schema = [
 					watermark, no limit on downloads.
 				</p>
 			</div>
-			<div class="mt-10 grid gap-5 md:grid-cols-2 md:gap-6">
-				<ToolCard tool={TOOLS[0]} index={0}>
-					<DielineArt slot="art" class="h-auto w-[86%]" />
-				</ToolCard>
-				<ToolCard tool={TOOLS[1]} index={1}>
+			<div class="mt-10 grid gap-5 md:grid-cols-2 md:grid-rows-[repeat(6,auto)] md:gap-x-6 md:gap-y-0">
+				<ToolCard tool={BILL} index={0}>
 					<BillArt slot="art" class="h-auto w-[86%]" />
+				</ToolCard>
+				<ToolCard tool={DIELINE} index={1}>
+					<DielineArt slot="art" class="h-auto w-[86%]" />
 				</ToolCard>
 			</div>
 		</div>
@@ -153,10 +164,10 @@ const schema = [
 				<p class="eyebrow text-on-tile-2">Why VendorDesk</p>
 				<h2 id="principles-heading" class="mt-3 text-display text-on-tile">Built the way a utility should be.</h2>
 			</div>
-			<div class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+			<div class="mt-12 grid gap-10 md:grid-cols-3 md:grid-rows-[repeat(3,auto)] md:gap-x-8 md:gap-y-0">
 				{
 					principles.map((p) => (
-						<div class="border-t border-white/15 pt-6">
+						<div class="border-t border-white/15 pt-6 md:row-span-3 md:grid md:grid-rows-subgrid">
 							<p class="tnum text-caption text-on-tile-2">{p.n}</p>
 							<h3 class="mt-3 text-title text-on-tile">{p.title}</h3>
 							<p class="mt-3 text-body text-on-tile-2">{p.body}</p>
@@ -176,11 +187,11 @@ const schema = [
 					<h2 id="how-heading" class="mt-3 text-display text-ink">Three steps, thirty seconds.</h2>
 					<p class="mt-4 text-body text-ink-2">No onboarding, no tutorial video. If you can fill in a form, you already know how to use VendorDesk.</p>
 				</div>
-				<ol class="grid gap-4 sm:grid-cols-3">
+				<ol class="grid gap-4 sm:grid-cols-3 sm:grid-rows-[repeat(3,auto)] sm:gap-x-4 sm:gap-y-0">
 					{
 						steps.map((s, i) => (
-							<li class="card p-6">
-								<span class="tnum inline-grid size-9 place-items-center rounded-full bg-primary text-caption font-semibold text-on-primary">{i + 1}</span>
+							<li class="card p-6 sm:row-span-3 sm:grid sm:grid-rows-subgrid">
+								<span class="tnum inline-grid size-9 place-items-center justify-self-start rounded-full bg-primary text-caption font-semibold text-on-primary">{i + 1}</span>
 								<h3 class="mt-5 text-[1.0625rem] font-semibold text-ink">{s.title}</h3>
 								<p class="mt-2 text-caption text-ink-2">{s.body}</p>
 							</li>
@@ -198,10 +209,10 @@ const schema = [
 				<p class="eyebrow">Made for</p>
 				<h2 id="audience-heading" class="mt-3 text-display text-ink">People who bill, print and ship for themselves.</h2>
 			</div>
-			<ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[repeat(2,auto)] lg:gap-x-4 lg:gap-y-0">
 				{
 					audiences.map((a) => (
-						<li class="card p-6">
+						<li class="card p-6 lg:row-span-2 lg:grid lg:grid-rows-subgrid">
 							<h3 class="text-[1.0625rem] font-semibold text-ink">{a.title}</h3>
 							<p class="mt-2 text-caption text-ink-2">{a.body}</p>
 						</li>
@@ -229,9 +240,9 @@ const schema = [
 				<h2 class="text-display text-on-tile">Start with the tool you need today.</h2>
 				<p class="mt-3 text-body text-on-tile-2">Both are free, both are instant, and neither will ask you for an email address.</p>
 			</div>
-			<div class="flex shrink-0 flex-col gap-3 sm:flex-row">
-				<a href={TOOLS[0].href} class="btn btn-primary">Paper bag dieline generator</a>
-				<a href={TOOLS[1].href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Bill of Supply</a>
+			<div class="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row">
+				<a href={BILL.href} class="btn btn-primary">Bill of Supply generator</a>
+				<a href={DIELINE.href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Paper bag dieline</a>
 			</div>
 		</div>
 	</section>

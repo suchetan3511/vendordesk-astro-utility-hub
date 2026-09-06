@@ -1,0 +1,162 @@
+# VendorDesk — Hostinger (Apache / LiteSpeed) server config.
+#
+# Copied verbatim into dist/ at build time and must sit in public_html/ on the server.
+# Every block is wrapped in <IfModule> so a missing module degrades quietly instead of
+# throwing a 500 — Hostinger's LiteSpeed answers to the mod_* names below, but the guard
+# keeps this file safe if the stack ever changes underneath it.
+
+# MultiViews lets Apache guess that /about means about.html on its own, but it negotiates
+# extensions in an order we do not control and can answer /about with about.png. The
+# explicit rewrites further down are deterministic, so turn the guessing off.
+<IfModule mod_negotiation.c>
+	Options -MultiViews
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Canonical host and scheme
+#
+# Without this, Hostinger answers on four hostnames with byte-identical HTML:
+# http/https × apex/www. Google treats those as four competing URLs and splits the
+# ranking signals between them. Each rule below lands on the canonical origin in a
+# SINGLE hop — http://www → https://apex directly, never http://www → https://www →
+# https://apex, because redirect chains leak PageRank and slow first paint.
+# ---------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+
+	# www → apex, already on https, one hop.
+	RewriteCond %{HTTP_HOST} ^www\.vendordesk\.tools$ [NC]
+	RewriteRule ^ https://vendordesk.tools%{REQUEST_URI} [R=301,L]
+
+	# http → https. X-Forwarded-Proto is checked too: when TLS is terminated at a proxy
+	# in front of the origin, %{HTTPS} reads "off" on an already-secure request and the
+	# site would redirect to itself forever.
+	RewriteCond %{HTTPS} !=on
+	RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+	RewriteRule ^ https://vendordesk.tools%{REQUEST_URI} [R=301,L]
+
+	# -----------------------------------------------------------------------
+	# Clean URLs
+	#
+	# Astro is built with `build.format: 'file'`, so pages are flat about.html files and
+	# canonicals are extensionless with no trailing slash (`trailingSlash: 'never'`).
+	# These rules make the server agree with the canonical instead of contradicting it.
+	# -----------------------------------------------------------------------
+
+	# /about.html → /about. Matching on THE_REQUEST (the raw request line) rather than the
+	# rewritten path is what stops this from looping against the internal rewrite below,
+	# which maps /about back onto about.html.
+	RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)index\.html[\s?] [NC]
+	RewriteRule ^ /%1 [R=301,L]
+
+	RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)\.html[\s?] [NC]
+	RewriteRule ^ /%1 [R=301,L]
+
+	# /about/ → /about. Real directories are exempt so /_astro/ still resolves.
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^(.+?)/$ /$1 [R=301,L]
+
+	# /about → about.html, served internally. No redirect: the extensionless URL in the
+	# canonical tag is the URL that returns 200.
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+	RewriteRule ^(.+?)/?$ /$1.html [L]
+</IfModule>
+
+# Astro builds a real 404 page; serve it instead of Apache's default body. Anything else
+# returns a soft 404 — a 200 status on an error page — which Search Console flags and which
+# lets dead URLs sit in the index.
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# ---------------------------------------------------------------------------
+# Compression
+#
+# The HTML is served uncompressed by default and this site ships ~50 KB of CSS plus
+# uncompressed HTML (compressHTML is off on purpose). Text compresses ~4-5×, and transfer
+# size feeds directly into LCP, which is a ranking signal.
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+	AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+	AddOutputFilterByType DEFLATE application/json application/manifest+json
+	AddOutputFilterByType DEFLATE application/xml application/rss+xml
+	AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# woff2 is already Brotli-compressed internally and PNGs are already deflated; running
+# them through gzip again burns CPU to add bytes.
+<IfModule mod_brotli.c>
+	AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+	AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
+	AddOutputFilterByType BROTLI_COMPRESS application/manifest+json image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Caching
+#
+# Everything under /_astro/ carries a content hash in its filename, so a changed file is
+# a changed URL and it can be cached forever. HTML must not be: it is the only thing that
+# points at the current hashes, so a stale copy would reference deleted assets.
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+	<FilesMatch "\.(css|js|woff2|png|jpg|jpeg|webp|avif|svg|ico)$">
+		Header set Cache-Control "public, max-age=31536000, immutable"
+	</FilesMatch>
+
+	# The hashing argument does not hold for these: they live at fixed URLs and are
+	# replaced in place, so they get a short TTL instead of an immortal one.
+	<FilesMatch "^(og\.png|favicon\.svg|apple-touch-icon\.png|manifest\.webmanifest|robots\.txt|sitemap.*\.xml)$">
+		Header set Cache-Control "public, max-age=86400"
+	</FilesMatch>
+
+	<FilesMatch "\.html$">
+		Header set Cache-Control "public, max-age=0, must-revalidate"
+	</FilesMatch>
+
+	# ---------------------------------------------------------------------
+	# Security headers
+	#
+	# No ranking effect on their own, but they are what a security scan and a manual
+	# trust review look for, and HSTS removes the http→https hop for returning visitors.
+	# `preload` is deliberately omitted: submitting to the preload list is effectively
+	# irreversible and would strand the domain if it ever had to serve plain http.
+	# ---------------------------------------------------------------------
+	Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	Header always set X-Content-Type-Options "nosniff"
+	Header always set Referrer-Policy "strict-origin-when-cross-origin"
+	Header always set X-Frame-Options "SAMEORIGIN"
+	Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+	# The tools are pure client-side JavaScript with no backend, so nothing here should
+	# ever talk to another origin. Kept as a report-free policy that matches what the
+	# pages actually do: inline styles and inline scripts (the theme bootstrap and the
+	# JSON-LD block) are allowed, everything cross-origin is not.
+	Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# MIME types and charset
+#
+# Serving .webmanifest as text/plain makes Chrome ignore the manifest, and an SVG without
+# a charset can render mojibake for the non-ASCII glyphs in the logo.
+# ---------------------------------------------------------------------------
+<IfModule mod_mime.c>
+	AddType application/manifest+json .webmanifest
+	AddType image/svg+xml .svg
+	AddType font/woff2 .woff2
+	AddDefaultCharset UTF-8
+	AddCharset UTF-8 .html .css .js .svg .xml .json .webmanifest
+</IfModule>
+
+# Directory listings would expose /_astro/ as a browsable index.
+<IfModule mod_autoindex.c>
+	Options -Indexes
+</IfModule>
+
+# Nothing should ever request these; they exist in the repo, not the deploy, but a stray
+# upload of the project folder would otherwise serve them.
+<FilesMatch "^(\.env.*|\.git.*|package.*\.json|astro\.config\.mjs|tsconfig\.json|wrangler\.jsonc|.*\.ts|.*\.astro|.*\.md)$">
+	Require all denied
+</FilesMatch>

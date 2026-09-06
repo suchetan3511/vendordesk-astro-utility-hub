@@ -4,7 +4,7 @@ import interWoff2 from '@fontsource-variable/inter/files/inter-latin-opsz-normal
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../lib/site';
-import { toJsonLd } from '../lib/schema';
+import { organization, toJsonLd, website } from '../lib/schema';
 
 interface Props {
 	title: string;
@@ -18,10 +18,22 @@ interface Props {
 
 const { title, description, schema, ogImage = '/og.png', noindex = false, titleTemplate = true } = Astro.props;
 
-const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+// The canonical is the clean, extensionless, slash-free URL that .htaccess actually serves
+// — never the file Astro happens to have written. Under `build.format: 'file'` the build-time
+// pathname is `/about.html` (and `/index.html` for the homepage), so it has to be normalised
+// back, or every page would declare a canonical that 301s to the URL we really want indexed.
+const path =
+	Astro.url.pathname
+		.replace(/\/index\.html$/, '/')
+		.replace(/\.html$/, '')
+		.replace(/\/+$/, '') || '/';
 const canonical = new URL(path, SITE.url).toString();
 const fullTitle = titleTemplate ? `${title} · ${SITE.name}` : title;
 const ogUrl = new URL(ogImage, SITE.url).toString();
+
+// Every page ships the WebSite and Organization nodes, so the @id references that page-level
+// schema makes (isPartOf, publisher, author) always resolve within the page's own graph.
+const graph = [website(), organization(), ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
 ---
 
 <!doctype html>
@@ -32,7 +44,12 @@ const ogUrl = new URL(ogImage, SITE.url).toString();
 		<title>{fullTitle}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
-		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		{/* Opt in to full-length snippets and large image previews; the conservative defaults
+		    otherwise cap how much of the page can show in a result. */}
+		<meta
+			name="robots"
+			content={noindex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'}
+		/>
 		<meta name="color-scheme" content="light dark" />
 		<meta name="theme-color" content="#f5f5f7" data-light="#f5f5f7" data-dark="#161618" />
 		<script is:inline>
@@ -49,7 +66,8 @@ const ogUrl = new URL(ogImage, SITE.url).toString();
 		</script>
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="sitemap" href="/sitemap.xml" />
 		<link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content={SITE.name} />
@@ -58,6 +76,7 @@ const ogUrl = new URL(ogImage, SITE.url).toString();
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />
 		<meta property="og:image" content={ogUrl} />
+		<meta property="og:image:type" content="image/png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
 		<meta property="og:image:alt" content={`${SITE.name} — ${SITE.tagline}`} />
@@ -65,8 +84,9 @@ const ogUrl = new URL(ogImage, SITE.url).toString();
 		<meta name="twitter:title" content={fullTitle} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogUrl} />
+		<meta name="twitter:image:alt" content={`${SITE.name} — ${SITE.tagline}`} />
 		<meta name="generator" content={Astro.generator} />
-		{schema && <script is:inline type="application/ld+json" set:html={toJsonLd(schema)} />}
+		<script is:inline type="application/ld+json" set:html={toJsonLd(graph)} />
 	</head>
 	<body class="flex min-h-dvh flex-col">
 		<a

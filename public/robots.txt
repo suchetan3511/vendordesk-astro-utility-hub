@@ -1,4 +1,7 @@
+# Everything is crawlable on purpose. /_astro/ holds the CSS and JS Google needs to render
+# the pages, and the noindex error pages must stay reachable so the noindex tag is actually
+# read — a Disallow here would hide the tag, not the page.
 User-agent: *
 Allow: /
 
-Sitemap: https://vendordesk.in/sitemap-index.xml
+Sitemap: https://vendordesk.tools/sitemap.xml

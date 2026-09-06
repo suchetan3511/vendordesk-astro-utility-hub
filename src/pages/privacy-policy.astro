@@ -10,7 +10,7 @@ const description =
 const updated = '6 September 2026';
 
 const schema = [
-	webPage({ name: `${title} · ${SITE.name}`, path: '/privacy-policy', description }),
+	webPage({ name: `${title} · ${SITE.name}`, path: '/privacy-policy', description, hasBreadcrumb: true }),
 	breadcrumb([
 		{ name: 'Home', path: '/' },
 		{ name: 'Privacy Policy', path: '/privacy-policy' },

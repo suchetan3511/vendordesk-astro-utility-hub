@@ -7,6 +7,8 @@
  * Nothing here touches the network: it runs entirely in the visitor's browser.
  */
 
+import { SITE } from '../lib/site';
+
 export type BagStyle = 'luxury' | 'rustic';
 export type Unit = 'mm' | 'in';
 
@@ -452,7 +454,7 @@ export function renderSvg(input: DielineInput, r: DielineResult, opts: RenderOpt
 				lx += fs * (3.2 + name.length * 0.55);
 			}
 			parts.push(
-				`<text x="${n(FW)}" y="${n(FH + margin + fs * 2.2)}" font-size="${n(fs * 0.7)}" fill="${INK.label}" text-anchor="end">Generated with vendordesk.in · verify with a physical mock-up before production</text>`,
+				`<text x="${n(FW)}" y="${n(FH + margin + fs * 2.2)}" font-size="${n(fs * 0.7)}" fill="${INK.label}" text-anchor="end">Generated with ${SITE.domain} · verify with a physical mock-up before production</text>`,
 			);
 		}
 		parts.push('</g>');
@@ -491,7 +493,7 @@ export function summaryText(input: DielineInput, r: DielineResult, unit: Unit): 
 		primary,
 		secondary,
 		'',
-		`https://vendordesk.in/paper-bag-die-line-generator?${toSearchParams(input, unit).toString()}`,
+		`${SITE.url}/paper-bag-die-line-generator?${toSearchParams(input, unit).toString()}`,
 	].join('\n');
 }
 

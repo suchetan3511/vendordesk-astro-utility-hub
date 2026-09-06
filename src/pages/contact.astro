@@ -5,10 +5,10 @@ import { SITE } from '../lib/site';
 import { breadcrumb, webPage } from '../lib/schema';
 
 const title = 'Contact';
-const description = `Get in touch with VendorDesk at ${SITE.email} — tool requests, corrections, partnership or press enquiries.`;
+const description = `Contact VendorDesk by email at ${SITE.email} — tool requests, corrections, bug reports, partnership or press enquiries.`;
 
 const schema = [
-	webPage({ name: `${title} · ${SITE.name}`, path: '/contact', description, type: 'ContactPage' }),
+	webPage({ name: `${title} · ${SITE.name}`, path: '/contact', description, type: 'ContactPage', hasBreadcrumb: true }),
 	breadcrumb([
 		{ name: 'Home', path: '/' },
 		{ name: 'Contact', path: '/contact' },
@@ -20,51 +20,39 @@ const schema = [
 	<PageHeader
 		eyebrow="Contact"
 		title="Say hello."
-		lead="Found a bug, need a correction, or have a calculation you wish existed as a tool? Email is the fastest way to reach us."
+		lead="Found a bug, need a correction, or have a calculation you wish existed as a tool? Email is the only way to reach us — there is no form, no chat widget and no phone queue."
 		crumbs={[{ name: 'Home', href: '/' }, { name: 'Contact' }]}
 	/>
 
 	<section class="bg-parchment">
-		<div class="mx-auto grid max-w-page gap-8 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-			<form action={`mailto:${SITE.email}`} method="get" enctype="text/plain" class="card p-6 sm:p-8" data-contact-form>
-				<h2 class="text-title text-ink">Send a message</h2>
-				<p class="mt-2 text-caption text-ink-2">
-					This form opens your own email app with the message pre-filled — nothing is sent through our servers.
-				</p>
-				<div class="mt-6 grid gap-5">
-					<div>
-						<label for="subject" class="field-label">Subject</label>
-						<input id="subject" name="subject" type="text" class="field" placeholder="e.g. Feature request: box die-line" required />
-					</div>
-					<div>
-						<label for="body" class="field-label">Message</label>
-						<textarea id="body" name="body" rows="7" class="field" placeholder="Tell us what you were trying to do, what happened, and which browser you were using." required></textarea>
-					</div>
-					<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-						<button type="submit" class="btn btn-primary">Open in my email app</button>
-						<p class="text-fine text-ink-3">Or write to us directly at the address on the right.</p>
-					</div>
+		<div class="mx-auto max-w-narrow px-5 py-12 sm:px-8 sm:py-16">
+			<div class="card p-6 text-center sm:p-10">
+				<p class="eyebrow">Email us</p>
+				<a href={`mailto:${SITE.email}`} class="mt-3 block text-title break-all text-primary">{SITE.email}</a>
+				<div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+					<a href={`mailto:${SITE.email}`} class="btn btn-primary w-full sm:w-auto">Open in my email app</a>
+					<button type="button" data-copy-email data-email={SITE.email} class="btn btn-ghost w-full sm:w-auto" aria-describedby="copy-status">
+						Copy address
+					</button>
 				</div>
-			</form>
+				<p id="copy-status" class="mt-3 text-fine text-ink-2" role="status" aria-live="polite"></p>
+				<p class="mt-6 text-caption text-ink-2">We usually reply within a couple of business days (IST).</p>
+			</div>
 
-			<aside class="grid gap-4 self-start">
-				<div class="card p-6">
-					<p class="eyebrow">Email</p>
-					<a href={`mailto:${SITE.email}`} class="mt-2 block text-title break-all text-primary">{SITE.email}</a>
-					<button type="button" data-copy-email class="btn btn-ghost btn-sm mt-4" aria-describedby="copy-status">Copy address</button>
-					<p id="copy-status" class="mt-2 text-fine text-ink-2" role="status" aria-live="polite"></p>
-				</div>
-				<div class="card p-6 text-caption text-ink-2">
-					<p class="font-semibold text-ink">What helps us help you</p>
-					<ul class="mt-3 grid gap-2 pl-5 list-disc">
-						<li>The tool and the inputs you used</li>
-						<li>What you expected vs. what happened</li>
-						<li>Your browser and device</li>
-						<li>For tool requests: the calculation or document, and who uses it</li>
-					</ul>
-					<p class="mt-4">We usually reply within a couple of business days (IST).</p>
-				</div>
-			</aside>
+			<div class="card mt-4 p-6 text-caption text-ink-2 sm:p-8">
+				<p class="font-semibold text-ink">What helps us help you</p>
+				<ul class="mt-3 grid list-disc gap-2 pl-5">
+					<li>The tool and the inputs you used</li>
+					<li>What you expected vs. what happened</li>
+					<li>Your browser and device</li>
+					<li>For tool requests: the calculation or document, and who uses it</li>
+				</ul>
+			</div>
+
+			<p class="mt-8 text-center text-caption text-ink-2">
+				Looking for how we handle your data? Read the <a href="/privacy-policy" class="link">privacy policy</a> or the
+				<a href="/terms-of-service" class="link">terms of service</a>.
+			</p>
 		</div>
 	</section>
 </Layout>
@@ -73,7 +61,7 @@ const schema = [
 	const btn = document.querySelector<HTMLButtonElement>('[data-copy-email]');
 	const status = document.getElementById('copy-status');
 	btn?.addEventListener('click', async () => {
-		const email = btn.parentElement?.querySelector('a')?.textContent?.trim() ?? '';
+		const email = btn.dataset.email ?? '';
 		try {
 			await navigator.clipboard.writeText(email);
 			if (status) status.textContent = 'Copied to clipboard.';
