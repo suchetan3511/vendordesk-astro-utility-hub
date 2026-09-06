@@ -7,7 +7,7 @@ import BillArt from '../components/art/BillArt.astro';
 import { SITE, TOOLS } from '../lib/site';
 import { organization, website, webPage } from '../lib/schema';
 
-const title = `${SITE.name} — Free browser tools for independent businesses & designers`;
+const title = 'Free Bill of Supply & Dieline Generators — VendorDesk';
 const description = SITE.description;
 
 const principles = [
@@ -47,6 +47,11 @@ const faqs = [
 		answer: 'Yes. Every tool on this site is free to use with no account, no watermark and no download limit. We may show unobtrusive advertising to keep the lights on.',
 	},
 	{
+		question: 'Which bills can I generate here?',
+		answer:
+			'A <a href="/unregistered-vendor-bill-of-supply">bill of supply</a> — the GST document used when no tax may be charged: by composition dealers (including restaurants under composition), for exempt or nil-rated goods, and by small sellers below the registration threshold. It downloads as an A4 PDF. This is not a tax-invoice tool, so if you are registered and charging CGST/SGST or IGST, you need a tax invoice instead.',
+	},
+	{
 		question: 'Do you store what I type into a tool?',
 		answer:
 			'No. The tools run entirely in your browser. Some tools can remember your last inputs in your own browser’s local storage so you can continue later — that data stays on your device and you can clear it at any time. Read the <a href="/privacy-policy">privacy policy</a>.',
@@ -77,14 +82,16 @@ const schema = [
 			<div class="max-w-2xl">
 				<p class="eyebrow animate-fade-up">Free · No sign-up · Runs entirely in your browser</p>
 				<h1 class="mt-4 text-hero text-ink animate-fade-up" style="animation-delay: 80ms">
-					Lightning‑fast utilities for independent businesses &amp;&nbsp;designers.
+					Lightning‑fast bill and dieline generators for independent&nbsp;businesses.
 				</h1>
 				<p class="mt-6 max-w-xl text-lead text-ink-2 animate-fade-up" style="animation-delay: 160ms">
-					Single-purpose tools that do one job perfectly: generate a print-ready paper bag die-line, or a GST-compliant Bill
-					of Supply. Type your numbers, download the file, get on with your day.
+					Two free online tools that do one job perfectly: a <strong class="font-semibold text-ink">bill of supply
+					generator</strong> that downloads a GST-compliant PDF, and a <strong class="font-semibold text-ink">paper bag
+					dieline generator</strong> that exports a real-scale SVG. Type your numbers, download the file, get on with your
+					day.
 				</p>
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-up" style="animation-delay: 240ms">
-					<a href={TOOLS[0].href} class="btn btn-primary btn-lg">Generate a die-line</a>
+					<a href={TOOLS[0].href} class="btn btn-primary btn-lg">Generate a bag dieline</a>
 					<a href={TOOLS[1].href} class="btn btn-secondary btn-lg">Create a Bill of Supply</a>
 				</div>
 				<ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-caption text-ink-2 animate-fade-up" style="animation-delay: 320ms">
@@ -122,9 +129,10 @@ const schema = [
 		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
 			<div class="max-w-2xl">
 				<p class="eyebrow">The tools</p>
-				<h2 id="tools-heading" class="mt-3 text-display text-ink">Two tools. Zero friction.</h2>
+				<h2 id="tools-heading" class="mt-3 text-display text-ink">Free online bill and dieline generators</h2>
 				<p class="mt-4 text-lead text-ink-2">
-					Each one replaces a bloated SaaS sign-up flow with a page that is ready the moment it loads.
+					Each one replaces a bloated SaaS sign-up flow with a page that is ready the moment it loads — no account, no
+					watermark, no limit on downloads.
 				</p>
 			</div>
 			<div class="mt-10 grid gap-5 md:grid-cols-2 md:gap-6">
@@ -222,7 +230,7 @@ const schema = [
 				<p class="mt-3 text-body text-on-tile-2">Both are free, both are instant, and neither will ask you for an email address.</p>
 			</div>
 			<div class="flex shrink-0 flex-col gap-3 sm:flex-row">
-				<a href={TOOLS[0].href} class="btn btn-primary">Die-line generator</a>
+				<a href={TOOLS[0].href} class="btn btn-primary">Paper bag dieline generator</a>
 				<a href={TOOLS[1].href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Bill of Supply</a>
 			</div>
 		</div>

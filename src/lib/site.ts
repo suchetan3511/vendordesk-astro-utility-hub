@@ -4,8 +4,9 @@ export const SITE = {
 	url: 'https://vendordesk.tools',
 	email: 'hello@vendordesk.in',
 	tagline: 'Lightning-fast utilities for independent businesses & designers.',
+	// Kept under ~155 characters so Google shows it without truncating.
 	description:
-		'Free, client-side B2B tools for independent businesses, digital designers and packaging specialists. Paper bag die-line generator, GST Bill of Supply generator and more — no sign-up, nothing leaves your browser.',
+		'Free bill of supply generator and paper bag dieline generator that run in your browser. GST-compliant PDF bills, real-scale SVG dielines, no sign-up.',
 	locale: 'en_IN',
 	twitter: '',
 } as const;
@@ -26,31 +27,47 @@ export const TOOLS: ToolMeta[] = [
 	{
 		slug: 'paper-bag-die-line-generator',
 		href: '/paper-bag-die-line-generator',
-		name: 'Paper Bag Die-Line Generator',
-		shortName: 'Die-Line Generator',
+		name: 'Paper Bag Dieline Generator',
+		shortName: 'Dieline Generator',
 		category: 'Packaging',
 		description:
-			'Turn height, width and gusset into a print-ready SVG die-line with material-aware bleed, luxury or rustic folds and seamless sticker layout lines.',
+			'Turn height, width and gusset into a print-ready SVG dieline with material-aware bleed, luxury or rustic folds and seamless sticker layout lines.',
 		features: ['Instant SVG & PNG export', 'Material-aware bleed', 'Seamless sticker guides', 'Sheet yield calculator'],
 		audience: 'Digital designers · Packaging manufacturers',
-		keywords: ['paper bag die line', 'paper bag template generator', 'SOS bag dieline', 'gusset bag template svg'],
+		keywords: [
+			'paper bag dieline generator',
+			'bag dieline generator',
+			'paper bag template generator',
+			'free dieline generator',
+			'packaging dieline svg',
+			'SOS bag dieline',
+			'gusset bag template',
+		],
 	},
 	{
 		slug: 'unregistered-vendor-bill-of-supply',
 		href: '/unregistered-vendor-bill-of-supply',
-		name: 'Bill of Supply Generator',
+		name: 'Free Bill of Supply Generator',
 		shortName: 'Bill of Supply',
 		category: 'GST compliance',
 		description:
-			'Create a GST-compliant Bill of Supply for unregistered vendors and composition dealers, then download it as a PDF — generated entirely in your browser.',
-		features: ['Rule 49 compliant layout', 'Sign on screen', 'Amount in words (lakh/crore)', 'One-click PDF'],
-		audience: 'Freelancers · Retail suppliers · Composition dealers',
-		keywords: ['bill of supply generator', 'bill of supply format', 'unregistered vendor invoice', 'composition dealer bill'],
+			'Create a GST-compliant bill of supply online and download the PDF free. For composition dealers, exempt supplies, restaurants under composition and small sellers below the GST threshold.',
+		features: ['Rule 49 compliant format', 'Sign on screen', 'Amount in words (lakh/crore)', 'Free PDF, no sign-up'],
+		audience: 'Freelancers · Small businesses · Composition dealers',
+		keywords: [
+			'free bill of supply generator',
+			'bill of supply format',
+			'bill of supply pdf',
+			'online free bill generator',
+			'free bill generator for small businesses',
+			'composition dealer bill format',
+			'unregistered vendor bill',
+		],
 	},
 ];
 
 export const NAV = [
-	{ href: '/paper-bag-die-line-generator', label: 'Die-Line Generator' },
+	{ href: '/paper-bag-die-line-generator', label: 'Dieline Generator' },
 	{ href: '/unregistered-vendor-bill-of-supply', label: 'Bill of Supply' },
 	{ href: '/about', label: 'About' },
 	{ href: '/contact', label: 'Contact' },
