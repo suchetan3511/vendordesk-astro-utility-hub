@@ -99,7 +99,7 @@ const schema = [
 			<form class="card p-5 sm:p-6" novalidate autocomplete="off" aria-label="Bag dimensions">
 				<div class="flex items-center justify-between gap-3">
 					<h3 class="text-[1.0625rem] font-semibold">Bag specification</h3>
-					<button type="button" id="reset-tool" class="text-caption text-ink-2 underline decoration-hairline-strong underline-offset-4 hover:text-ink">Reset</button>
+					<button type="button" id="reset-tool" class="btn-quiet">Reset</button>
 				</div>
 
 				<!-- Live result strip (mobile sees numbers change instantly) -->
@@ -205,15 +205,15 @@ const schema = [
 						</div>
 						<div class="grid gap-2.5">
 							<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
-								<input id="show-sticker" type="checkbox" checked class="size-5 accent-primary" />
+								<input id="show-sticker" type="checkbox" checked class="checkbox" />
 								Show seamless sticker blend layout lines
 							</label>
 							<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
-								<input id="show-handles" type="checkbox" checked class="size-5 accent-primary" />
+								<input id="show-handles" type="checkbox" checked class="checkbox" />
 								Show handle marks (eyelets or glue patches)
 							</label>
 							<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
-								<input id="show-labels" type="checkbox" checked class="size-5 accent-primary" />
+								<input id="show-labels" type="checkbox" checked class="checkbox" />
 								Show labels and dimension lines
 							</label>
 						</div>

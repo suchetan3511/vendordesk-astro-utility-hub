@@ -83,7 +83,7 @@ const schema = [
 		</div>
 	</section>
 
-	<section id="tool" class="bg-parchment pb-24 lg:pb-0" aria-labelledby="tool-heading">
+	<section id="tool" class="bg-parchment" aria-labelledby="tool-heading">
 		<h2 id="tool-heading" class="sr-only">Bill of Supply form and preview</h2>
 		<div class="mx-auto grid max-w-page gap-6 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:items-start" data-bos-tool>
 			<!-- Form -->
@@ -199,7 +199,7 @@ const schema = [
 							<input id="discount" name="discount" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
 						</div>
 						<label class="flex min-h-11 items-center gap-3 self-end text-caption text-ink">
-							<input name="roundOff" type="checkbox" class="size-5 accent-primary" />
+							<input name="roundOff" type="checkbox" class="checkbox" />
 							Round total to the nearest rupee
 						</label>
 					</div>
@@ -240,10 +240,10 @@ const schema = [
 
 				<div class="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-5">
 					<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
-						<input name="keepDraft" type="checkbox" class="size-5 accent-primary" />
+						<input name="keepDraft" type="checkbox" class="checkbox" />
 						Keep a draft in this browser
 					</label>
-					<button type="button" data-clear-draft class="text-caption text-ink-2 underline decoration-hairline-strong underline-offset-4 hover:text-ink">Clear draft &amp; reset</button>
+					<button type="button" data-clear-draft class="btn-quiet">Clear draft &amp; reset</button>
 				</div>
 				<p class="-mt-4 text-fine text-ink-3">Drafts are stored only in your browser’s local storage. Nothing is sent to VendorDesk.</p>
 			</form>
@@ -368,7 +368,7 @@ const schema = [
 			<div data-item-row class="grid gap-2 rounded-md border border-hairline bg-parchment p-3">
 				<div class="flex items-center justify-between">
 					<span class="text-fine font-semibold text-ink-2">Item <span data-item-index>1</span></span>
-					<button type="button" data-remove-item class="press inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-fine text-ink-2 hover:text-danger disabled:opacity-40" aria-label="Remove item">
+					<button type="button" data-remove-item class="press -my-1 inline-flex min-h-9 items-center gap-1 rounded-full px-2.5 text-fine text-ink-2 hover:text-danger disabled:opacity-40" aria-label="Remove item">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
 						Remove
 					</button>
@@ -537,6 +537,14 @@ const schema = [
 </Layout>
 
 <style is:global>
+	/* The fixed mobile action bar overlays the page, so give the document room to
+	   scroll clear of it — otherwise the end of the footer can never be reached. */
+	@media (max-width: 1023px) {
+		body {
+			padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+		}
+	}
+
 	/* A4 document — hex colours only so html2canvas can rasterise it faithfully in any theme. */
 	.bos {
 		width: 794px;
@@ -748,6 +756,9 @@ const schema = [
 		color: #86868b;
 	}
 	@media print {
+		body {
+			padding-bottom: 0 !important;
+		}
 		body > * {
 			display: none !important;
 		}
