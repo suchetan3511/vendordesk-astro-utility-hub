@@ -43,7 +43,7 @@ export const TOOLS: ToolMeta[] = [
 		category: 'GST compliance',
 		description:
 			'Create a GST-compliant Bill of Supply for unregistered vendors and composition dealers, then download it as a PDF — generated entirely in your browser.',
-		features: ['Rule 49 compliant layout', 'Amount in words (lakh/crore)', 'One-click PDF', 'Drafts stay on your device'],
+		features: ['Rule 49 compliant layout', 'Sign on screen', 'Amount in words (lakh/crore)', 'One-click PDF'],
 		audience: 'Freelancers · Retail suppliers · Composition dealers',
 		keywords: ['bill of supply generator', 'bill of supply format', 'unregistered vendor invoice', 'composition dealer bill'],
 	},

@@ -13,6 +13,7 @@ import {
 	stateName,
 	todayISO,
 } from '../lib/india';
+import { createSignaturePad, type SigStroke, type SignaturePad } from './signature-pad';
 
 export type SupplierType = 'unregistered' | 'composition';
 
@@ -43,6 +44,8 @@ export interface BosState {
 	roundOff: boolean;
 	notes: string;
 	bank: { accountName: string; accountNumber: string; ifsc: string; upi: string };
+	/** Drawn signature (normalised strokes) plus a typed fallback for keyboard users. */
+	signature: { strokes: SigStroke[]; typed: string };
 	keepDraft: boolean;
 }
 
@@ -65,6 +68,7 @@ export function defaultState(): BosState {
 		roundOff: false,
 		notes: 'Thank you for your business. Payment is due within 15 days of the bill date.',
 		bank: { accountName: '', accountNumber: '', ifsc: '', upi: '' },
+		signature: { strokes: [], typed: '' },
 		keepDraft: true,
 	};
 }
@@ -155,6 +159,7 @@ function loadDraft(): BosState | null {
 			bill: { ...base.bill, ...(parsed.bill ?? {}) },
 			recipient: { ...base.recipient, ...(parsed.recipient ?? {}) },
 			bank: { ...base.bank, ...(parsed.bank ?? {}) },
+			signature: { ...base.signature, ...(parsed.signature ?? {}) },
 			items: Array.isArray(parsed.items) && parsed.items.length ? parsed.items.map((i) => newItem(i)) : base.items,
 		};
 	} catch {
@@ -318,12 +323,78 @@ export function initBillOfSupplyTool(root: HTMLElement) {
 		state = { ...defaultState(), keepDraft: state.keepDraft };
 		posTouched = false;
 		dirty = false;
+		pad?.setStrokes([]);
+		signatureUrl = '';
 		syncFormFromState();
 		render();
 		announce('Draft cleared. The form has been reset.');
 	});
 
+	/* Signature ------------------------------------------------------------- */
+
+	let pad: SignaturePad | null = null;
+	let signatureUrl = '';
+	const padCanvas = $<HTMLCanvasElement>('[data-signature-pad]');
+	const padPlaceholder = $('[data-signature-placeholder]');
+	const padStatus = $('[data-signature-status]');
+
+	/** Cheap: text and button state only. Safe to call on every render. */
+	function updateSignatureStatus() {
+		const signed = Boolean(signatureUrl);
+		if (padPlaceholder) padPlaceholder.hidden = signed;
+		if (padStatus) padStatus.textContent = signed ? 'Signed' : state.signature.typed.trim() ? 'Using typed name' : 'Not signed';
+		$$('[data-signature-undo], [data-signature-clear]').forEach((b) => ((b as HTMLButtonElement).disabled = !signed));
+	}
+
+	/** Expensive: re-exports the PNG. Only call when the drawing itself changed. */
+	function refreshSignature() {
+		signatureUrl = pad && !pad.isEmpty() ? pad.toDataURL() : '';
+		updateSignatureStatus();
+	}
+
+	if (padCanvas) {
+		pad = createSignaturePad(padCanvas, {
+			onChange: () => {
+				state.signature.strokes = pad ? pad.getStrokes() : [];
+				refreshSignature();
+				render();
+			},
+		});
+		if (state.signature.strokes.length) pad.setStrokes(state.signature.strokes);
+		// The canvas may still be laying out, so re-export once it has a real size.
+		new ResizeObserver(() => {
+			if (!pad || pad.isEmpty()) return;
+			const next = pad.toDataURL();
+			if (next && next !== signatureUrl) {
+				signatureUrl = next;
+				applySignature();
+			}
+		}).observe(padCanvas);
+	}
+
+	$('[data-signature-clear]')?.addEventListener('click', () => {
+		pad?.clear();
+		announce('Signature cleared.');
+	});
+	$('[data-signature-undo]')?.addEventListener('click', () => pad?.undo());
+
 	/* Document rendering ---------------------------------------------------- */
+
+	const signatureImg = $<HTMLImageElement>('[data-doc-signature]');
+	const signatureTyped = $('[data-doc-typed]');
+
+	/** Drawn signature wins; a typed name is the keyboard-accessible fallback. */
+	function applySignature() {
+		const typed = state.signature.typed.trim();
+		if (signatureImg) {
+			signatureImg.hidden = !signatureUrl;
+			if (signatureUrl && signatureImg.src !== signatureUrl) signatureImg.src = signatureUrl;
+		}
+		if (signatureTyped) {
+			signatureTyped.hidden = Boolean(signatureUrl) || !typed;
+			signatureTyped.textContent = typed;
+		}
+	}
 
 	const docText = (key: string, value: string, hideWhenEmpty = false) => {
 		$$(`[data-doc="${key}"]`).forEach((el) => {
@@ -399,6 +470,8 @@ export function initBillOfSupplyTool(root: HTMLElement) {
 		bankBlock.hidden = bankLines.length === 0;
 		docText('bank', bankLines.join('\n'));
 		docText('signatory', s.name.trim() ? `For ${s.name.trim()}` : 'For your business');
+		applySignature();
+		updateSignatureStatus();
 
 		$$('[data-out="total"]').forEach((el) => (el.textContent = formatINR(totals.total)));
 		dynamicText.textContent = dynamicSummary(state, totals);
@@ -484,6 +557,7 @@ export function initBillOfSupplyTool(root: HTMLElement) {
 	$('[data-print]')?.addEventListener('click', () => window.print());
 
 	syncFormFromState();
+	refreshSignature();
 	render();
 	initialised = true;
 	root.dataset.ready = 'true';
