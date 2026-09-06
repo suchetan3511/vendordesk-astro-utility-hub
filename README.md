@@ -81,4 +81,4 @@ The site is a fully static build hosted on Hostinger's Apache/LiteSpeed web host
     curl -sI https://vendordesk.tools/nope       # 404 (the styled page, not Apache's default)
     curl -sI -H "Accept-Encoding: gzip, br" https://vendordesk.tools/  # Content-Encoding: gzip or br
     ```
-*   **After go-live:** submit `https://vendordesk.tools/sitemap.xml` in Google Search Console and verify the domain property. The sitemap is already referenced from `robots.txt` and every page's `<head>`.
+*   **After go-live:** submit `https://vendordesk.tools/sitemap-index.xml` in Google Search Console and verify the domain property. The sitemap is already referenced from `robots.txt` and every page's `<head>`.

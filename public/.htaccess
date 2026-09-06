@@ -52,6 +52,10 @@
 	RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)\.html[\s?] [NC]
 	RewriteRule ^ /%1 [R=301,L]
 
+	# The sitemap moved from the hand-built /sitemap.xml to @astrojs/sitemap's index file;
+	# anything that cached the old robots.txt or head link should land on the new one.
+	RewriteRule ^sitemap\.xml$ /sitemap-index.xml [R=301,L]
+
 	# /about/ → /about. Real directories are exempt so /_astro/ still resolves.
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^(.+?)/$ /$1 [R=301,L]
@@ -129,11 +133,11 @@ ErrorDocument 500 /500.html
 	Header always set X-Frame-Options "SAMEORIGIN"
 	Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
 
-	# The tools are pure client-side JavaScript with no backend, so nothing here should
-	# ever talk to another origin. Kept as a report-free policy that matches what the
-	# pages actually do: inline styles and inline scripts (the theme bootstrap and the
-	# JSON-LD block) are allowed, everything cross-origin is not.
-	Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+	# The tools are pure client-side JavaScript with no backend, so the only cross-origin
+	# traffic is Google Analytics (gtag.js loaded from googletagmanager.com, hits sent to
+	# google-analytics.com / analytics.google.com). Inline styles and inline scripts (the
+	# theme bootstrap, the gtag bootstrap and the JSON-LD block) are allowed.
+	Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
 </IfModule>
 
 # ---------------------------------------------------------------------------

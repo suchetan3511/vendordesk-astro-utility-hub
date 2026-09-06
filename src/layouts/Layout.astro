@@ -41,6 +41,17 @@ const graph = [website(), organization(), ...(schema ? (Array.isArray(schema) ? 
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<!-- Google tag (gtag.js) -->
+		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-639XP02EB7"></script>
+		<script is:inline>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag('js', new Date());
+
+			gtag('config', 'G-639XP02EB7');
+		</script>
 		<title>{fullTitle}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
@@ -67,7 +78,7 @@ const graph = [website(), organization(), ...(schema ? (Array.isArray(schema) ? 
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/manifest.webmanifest" />
-		<link rel="sitemap" href="/sitemap.xml" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content={SITE.name} />
