@@ -1,7 +1,7 @@
 export const SITE = {
 	name: 'VendorDesk',
-	legalName: 'VendorDesk.tools',
-	url: 'https://vendordesk.tools',
+	legalName: 'VendorDesk.in',
+	url: 'https://vendordesk.in',
 	email: 'hello@vendordesk.in',
 	tagline: 'Lightning-fast utilities for independent businesses & designers.',
 	// Kept under ~155 characters so Google shows it without truncating.
