@@ -7,9 +7,9 @@ import { breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema
 import { ITEM_UNITS, STATES } from '../lib/india';
 
 const tool = TOOLS[1];
-const title = 'Bill of Supply Generator — Free GST-Compliant PDF';
+const title = 'Free Bill of Supply Generator — GST Format, PDF';
 const description =
-	'Create a GST-compliant Bill of Supply in your browser, sign it on screen with touch, stylus or mouse, and download the PDF. For unregistered vendors, freelancers and composition dealers — no sign-up.';
+	'Create a GST bill of supply online free and download the PDF. For composition dealers, exempt supplies, restaurants and small sellers. No sign-up.';
 
 const faqs = [
 	{
@@ -31,6 +31,26 @@ const faqs = [
 		question: 'Is a Bill of Supply required for small amounts?',
 		answer:
 			'Under Rule 49 read with Rule 46, a registered person need not issue a bill of supply where the value is less than ₹200 and the recipient is unregistered and does not ask for one — provided a consolidated bill of supply is prepared at the end of each day for all such supplies.',
+	},
+	{
+		question: 'Is this bill generator really free, and is the PDF watermarked?',
+		answer:
+			'It is free with no limit on how many bills you create, no account, and <strong>no watermark</strong> on the PDF. The document is assembled by JavaScript in your own browser, so there is no server cost to pass on to you and no upload of your figures.',
+	},
+	{
+		question: 'Can a restaurant use this bill generator?',
+		answer:
+			'Yes, if the restaurant is registered under the <strong>composition scheme</strong> (Section 10, 5% rate, turnover up to ₹1.5 crore). Composition restaurants cannot collect GST from diners, so every bill they issue must be a bill of supply carrying the prescribed declaration — exactly what this tool produces. A restaurant paying tax at the regular rates must issue a <em>tax invoice</em> instead, which this tool does not generate.',
+	},
+	{
+		question: 'Does it work on a phone, like an app?',
+		answer:
+			'Yes. It is a website, so there is nothing to install — open it in your phone’s browser and it works, including signing with your finger. On Android and iOS you can use “Add to Home screen” to keep it one tap away, and it will still run without a network connection to our servers, because the bill is built on your device.',
+	},
+	{
+		question: 'What is the correct bill of supply format?',
+		answer:
+			'Rule 49 of the CGST Rules sets the fields: supplier name, address and GSTIN; a consecutive serial number unique for the financial year (up to 16 characters); the date of issue; the recipient’s name, address and GSTIN or UIN if registered; HSN or SAC codes; a description of the goods or services; the value after discount; and the supplier’s signature. This generator lays out every one of those fields for you, so the format is correct by construction.',
 	},
 ];
 
@@ -68,19 +88,20 @@ const schema = [
 			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
 			<div class="mt-6 max-w-3xl">
 				<p class="eyebrow">GST compliance · Free · No sign-up</p>
-				<h1 class="mt-3 text-display text-ink">Bill of Supply Generator</h1>
+				<h1 class="mt-3 text-display text-ink">Free Bill of Supply Generator</h1>
 				<p class="mt-4 text-lead text-ink-2">
-					For unregistered vendors, freelancers and composition dealers who cannot charge GST. Fill in the details, watch the
-					A4 document build itself, and download a PDF — nothing is uploaded, ever.
+					Make a GST-compliant bill of supply online, sign it on screen, and download the PDF — free, with no sign-up and no
+					watermark. Built for composition dealers, exempt supplies, restaurants under composition, and small businesses
+					below the GST registration threshold.
 				</p>
 			</div>
 			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Highlights">
-				<li class="chip">Rule 49 fields</li>
+				<li class="chip">Free · no watermark</li>
+				<li class="chip">Rule 49 format</li>
 				<li class="chip">Composition declaration</li>
 				<li class="chip">Sign on screen</li>
 				<li class="chip">Amount in words</li>
-				<li class="chip">A4 PDF</li>
-				<li class="chip">Drafts stay on your device</li>
+				<li class="chip">A4 PDF download</li>
 			</ul>
 		</div>
 	</section>
@@ -307,7 +328,9 @@ const schema = [
 							<div id="bos-document" class="bos">
 								<header class="bos-header bos-block">
 									<div>
-										<h2 class="bos-title">Bill of Supply</h2>
+										<!-- Not a heading element: this is the rendered document's own title, and it
+										     should not appear in the page's SEO heading outline. -->
+										<p class="bos-title">Bill of Supply</p>
 										<p class="bos-subtitle">Not a tax invoice · No GST charged on this supply</p>
 										<p class="bos-declaration" data-doc="declaration"></p>
 									</div>
@@ -520,6 +543,42 @@ const schema = [
 					is what most customers, accountants and marketplaces expect to see.
 				</p>
 
+				<h2>Who this free bill generator is for</h2>
+				<p>
+					Most online bill generators are built for a regular GST-registered business charging tax. This one is deliberately
+					the opposite: it is for the far larger group of Indian sellers who <strong>must not</strong> put GST on the
+					document at all.
+				</p>
+
+				<h3>Small businesses below the registration threshold</h3>
+				<p>
+					If your aggregate turnover is under ₹40 lakh for goods or ₹20 lakh for services (₹20 lakh and ₹10 lakh in the
+					special-category states), you are not required to register, and you cannot charge GST. You still need to hand
+					customers a clean, numbered bill for their books — one that shows no tax and says plainly that you are
+					unregistered. That is what this generator produces, free and without an account.
+				</p>
+
+				<h3>Restaurants under the composition scheme</h3>
+				<p>
+					A restaurant with turnover up to ₹1.5 crore can opt into the composition scheme and pay a flat 5% on its own
+					turnover. In exchange it <strong>cannot collect any GST from diners</strong>, so every bill it hands over must be
+					a bill of supply carrying the words “Composition taxable person, not eligible to collect tax on supplies”. Select
+					<em>Composition dealer</em> above and the declaration is added for you. A restaurant paying tax at the regular
+					rates is in the opposite position and must issue a tax invoice, which this tool does not produce.
+				</p>
+
+				<h3>Traders and manufacturers under composition</h3>
+				<p>
+					The same logic covers composition traders and manufacturers up to ₹1.5 crore, and composition service providers up
+					to ₹50 lakh under Section 10(2A). All of them bill on a bill of supply, never a tax invoice.
+				</p>
+
+				<h3>Anyone selling exempt or nil-rated goods</h3>
+				<p>
+					Fresh produce, unbranded grains and flour, educational and healthcare services and other exempt supplies are
+					billed on a bill of supply even by a regular registered business, because there is no tax to show.
+				</p>
+
 				<h2>What Rule 49 says the document must contain</h2>
 				<ol>
 					<li>Name, address and GSTIN of the supplier (GSTIN not applicable to unregistered vendors).</li>
@@ -580,7 +639,7 @@ const schema = [
 				<h2 class="text-title text-on-tile">Printing packaging for the same client?</h2>
 				<p class="mt-2 text-body text-on-tile-2">Generate a real-scale paper bag die-line with material-aware bleed in seconds.</p>
 			</div>
-			<a href={TOOLS[0].href} class="btn btn-primary shrink-0">Open the die-line generator</a>
+			<a href={TOOLS[0].href} class="btn btn-primary shrink-0">Open the paper bag dieline generator</a>
 		</div>
 	</section>
 </Layout>
