@@ -1,0 +1,21 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "vendordesk",
+	"compatibility_date": "2026-09-06",
+
+	// Static-assets-only Worker: no `main` entry point, so requests are served
+	// straight from ./dist without invoking any Worker code.
+	"assets": {
+		"directory": "./dist",
+
+		// Astro is configured with `trailingSlash: 'never'` and emits canonicals
+		// without a trailing slash, so /about/ must redirect to /about — not the
+		// other way around. Leaving this on the default (auto-trailing-slash)
+		// would fight the canonical tags.
+		"html_handling": "drop-trailing-slash",
+
+		// Astro builds a real 404.html; serve it instead of a bare 404 body.
+		// (Do NOT use "single-page-application" — this is a multi-page site.)
+		"not_found_handling": "404-page"
+	}
+}
