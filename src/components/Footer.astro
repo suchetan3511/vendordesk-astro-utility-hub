@@ -1,0 +1,46 @@
+---
+import Logo from './Logo.astro';
+import { FOOTER_GROUPS, SITE } from '../lib/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-hairline bg-parchment">
+	<div class="mx-auto max-w-page px-5 py-14 sm:px-8 sm:py-16">
+		<div class="grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)] md:gap-8">
+			<div class="max-w-sm">
+				<a href="/" class="inline-flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
+					<Logo />
+					<span class="text-[17px] font-semibold tracking-[-0.02em] text-ink" translate="no">{SITE.name}</span>
+				</a>
+				<p class="mt-4 text-caption text-ink-2">
+					Free browser tools for independent businesses, designers and packaging specialists. Every calculation and
+					document is generated on your device — nothing you type is uploaded, saved or seen by us.
+				</p>
+				<a href={`mailto:${SITE.email}`} class="link mt-4 inline-block text-caption">{SITE.email}</a>
+			</div>
+
+			{
+				FOOTER_GROUPS.map((group) => (
+					<nav aria-label={group.heading}>
+						<h2 class="text-caption font-semibold text-ink">{group.heading}</h2>
+						<ul class="mt-3">
+							{group.links.map((link) => (
+								<li>
+									<a href={link.href} class="inline-flex min-h-10 items-center text-caption text-ink-2 transition-colors hover:text-ink">
+										{link.label}
+									</a>
+								</li>
+							))}
+						</ul>
+					</nav>
+				))
+			}
+		</div>
+
+		<div class="mt-12 flex flex-col gap-3 border-t border-hairline pt-6 text-fine text-ink-3 sm:flex-row sm:items-center sm:justify-between">
+			<p>© {year} {SITE.name}. All tools are provided for estimation and layout purposes only.</p>
+			<p>Static site · No servers · No trackers on your inputs</p>
+		</div>
+	</div>
+</footer>

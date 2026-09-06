@@ -1,23 +1,84 @@
+---
+import '../styles/global.css';
+import interWoff2 from '@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2?url';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../lib/site';
+import { toJsonLd } from '../lib/schema';
+
+interface Props {
+	title: string;
+	description: string;
+	schema?: Record<string, unknown> | Record<string, unknown>[];
+	ogImage?: string;
+	noindex?: boolean;
+	/** When false the title is used verbatim (homepage). */
+	titleTemplate?: boolean;
+}
+
+const { title, description, schema, ogImage = '/og.png', noindex = false, titleTemplate = true } = Astro.props;
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const canonical = new URL(path, SITE.url).toString();
+const fullTitle = titleTemplate ? `${title} · ${SITE.name}` : title;
+const ogUrl = new URL(ogImage, SITE.url).toString();
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#f5f5f7" data-light="#f5f5f7" data-dark="#161618" />
+		<script is:inline>
+			(function () {
+				try {
+					var stored = localStorage.getItem('vd-theme');
+					var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+					document.documentElement.setAttribute('data-theme', theme);
+					var meta = document.querySelector('meta[name="theme-color"]');
+					if (meta) meta.setAttribute('content', meta.getAttribute('data-' + theme) || '');
+				} catch (e) {}
+			})();
+		</script>
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={SITE.name} />
+		<meta property="og:locale" content={SITE.locale} />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogUrl} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content={`${SITE.name} — ${SITE.tagline}`} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={fullTitle} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogUrl} />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		{schema && <script is:inline type="application/ld+json" set:html={toJsonLd(schema)} />}
 	</head>
-	<body>
-		<slot />
+	<body class="flex min-h-dvh flex-col">
+		<a
+			href="#main"
+			class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-5 focus:py-3 focus:text-on-primary"
+		>
+			Skip to content
+		</a>
+		<Header />
+		<main id="main" class="flex-1">
+			<slot />
+		</main>
+		<Footer />
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

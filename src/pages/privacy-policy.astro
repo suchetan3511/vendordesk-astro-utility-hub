@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE } from '../lib/site';
+import { breadcrumb, webPage } from '../lib/schema';
+
+const title = 'Privacy Policy';
+const description =
+	'How VendorDesk handles your data: all calculations and PDF generation happen locally in your browser, and we do not transmit, save or store your financial inputs, client names or packaging dimensions on any server.';
+const updated = '6 September 2026';
+
+const schema = [
+	webPage({ name: `${title} · ${SITE.name}`, path: '/privacy-policy', description }),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: 'Privacy Policy', path: '/privacy-policy' },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema}>
+	<PageHeader
+		eyebrow="Legal"
+		title="Privacy Policy"
+		lead="The short version: your inputs stay on your device. This page explains exactly what that means and what little we do collect."
+		crumbs={[{ name: 'Home', href: '/' }, { name: 'Privacy Policy' }]}
+	>
+		<p class="mt-6 text-caption text-ink-3">Last updated {updated}</p>
+	</PageHeader>
+
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<p class="callout">
+					<strong>All mathematical calculations and PDF generations happen locally in your web browser. VendorDesk does not
+					transmit, save, or store your financial inputs, client names, or packaging dimensions on any server.</strong>
+				</p>
+
+				<h2>1. Who we are</h2>
+				<p>
+					This website, {SITE.legalName} (“VendorDesk”, “we”, “us”), is an independent collection of browser-based utilities
+					for businesses and designers. You can contact us at <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+				</p>
+
+				<h2>2. Data you enter into our tools</h2>
+				<p>
+					Our tools — including the Paper Bag Die-Line Generator and the Bill of Supply Generator — are implemented entirely as
+					client-side JavaScript. When you type dimensions, business details, client details, item descriptions or amounts,
+					that information is processed by your own browser to draw the preview, calculate results and build the SVG, PNG or
+					PDF file you download.
+				</p>
+				<ul>
+					<li>Your inputs are <strong>not sent to VendorDesk</strong>, our hosting provider, or any third party.</li>
+					<li>We have <strong>no database</strong> of user inputs and no accounts, because none are needed.</li>
+					<li>Files you download are created in your browser’s memory and saved directly to your device.</li>
+				</ul>
+
+				<h2>3. Information stored on your device</h2>
+				<p>
+					To make the tools more convenient, some pages use your browser’s <em>local storage</em> to remember settings on
+					your own device, for example:
+				</p>
+				<ul>
+					<li>Your light or dark theme preference.</li>
+					<li>The last dimensions and options you used in the die-line generator.</li>
+					<li>A draft of your Bill of Supply so you can return to it later, if you choose to keep drafts.</li>
+				</ul>
+				<p>
+					This data never leaves your browser and is not visible to us. You can delete it at any time using the “Reset” or
+					“Clear draft” controls on the tool pages, or by clearing your browser’s site data for this website.
+				</p>
+
+				<h2>4. Server logs</h2>
+				<p>
+					Like virtually every website, the infrastructure that serves our static files may automatically record standard
+					technical information about requests — such as the page requested, the date and time, your IP address, browser
+					type and referring page — for security, abuse prevention and capacity planning. These logs are not linked to any
+					tool inputs (which, again, are never transmitted) and are retained only for as long as the hosting provider’s
+					standard retention period.
+				</p>
+
+				<h2>5. Cookies and advertising</h2>
+				<p>
+					VendorDesk itself does not set tracking cookies. To keep the tools free, we may display advertising provided by
+					third-party advertising networks such as Google AdSense. Where advertising is shown:
+				</p>
+				<ul>
+					<li>Third-party vendors, including Google, may use cookies or similar identifiers to serve ads based on your prior visits to this or other websites.</li>
+					<li>Google’s use of advertising cookies enables it and its partners to serve ads based on your visit to this site and/or other sites on the Internet.</li>
+					<li>You may opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" rel="noopener noreferrer">Google Ads Settings</a> or <a href="https://www.aboutads.info/choices/" rel="noopener noreferrer">aboutads.info</a>.</li>
+				</ul>
+				<p>
+					Any advertising is served in separate page areas and has no access to the contents of the tools or the data you
+					enter into them.
+				</p>
+
+				<h2>6. Analytics</h2>
+				<p>
+					We do not run analytics or session-recording scripts on the tool inputs. If we introduce privacy-respecting,
+					aggregate page-view analytics in the future, this policy will be updated before it goes live.
+				</p>
+
+				<h2>7. Email</h2>
+				<p>
+					If you write to us, we will use your email address and message solely to reply to you. Our contact form opens your
+					own email application; it does not submit anything to our servers.
+				</p>
+
+				<h2>8. Children</h2>
+				<p>VendorDesk is a business utility and is not directed at children under 16. We do not knowingly collect personal data from children.</p>
+
+				<h2>9. Your rights</h2>
+				<p>
+					Because we do not hold your tool data, there is nothing for us to access, correct or delete on your behalf — it is
+					already under your control on your own device. For anything relating to email correspondence or server logs, you
+					can contact us at <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and we will respond in line with applicable
+					law, including India’s Digital Personal Data Protection Act, 2023.
+				</p>
+
+				<h2>10. Changes to this policy</h2>
+				<p>
+					We may update this policy as the site evolves. The “last updated” date at the top of this page will change when we
+					do, and material changes will be summarised here.
+				</p>
+			</div>
+		</div>
+	</section>
+</Layout>
