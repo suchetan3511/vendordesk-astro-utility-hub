@@ -1,13 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ToolCard from '../components/ToolCard.astro';
+import ToolCardCompact from '../components/ToolCardCompact.astro';
 import Faq from '../components/Faq.astro';
 import DielineArt from '../components/art/DielineArt.astro';
 import BillArt from '../components/art/BillArt.astro';
-import { BILL, DIELINE, SITE, TOOLS } from '../lib/site';
+import {
+	ARTICLES,
+	BILL,
+	BOL,
+	DIELINE,
+	DIM_WEIGHT,
+	FREIGHT_CHART,
+	FREIGHT_CLASS,
+	GROUP_LABELS,
+	NMFC_LOOKUP,
+	PURCHASE_ORDER,
+	SITE,
+	TOOLS,
+} from '../lib/site';
 import { itemList, webPage } from '../lib/schema';
 
-const title = 'Free Bill of Supply & Dieline Generators — VendorDesk';
+const title = 'VendorDesk — Free Shipping & Business Document Tools';
 const description = SITE.description;
 
 const principles = [
@@ -23,33 +37,45 @@ const principles = [
 	},
 	{
 		n: '03',
-		title: 'Built for Indian B2B reality',
-		body: 'Millimetres and inches. Kraft, art paper and grain-lined stock. GST composition rules and the lakh–crore number system. Details generic tools skip.',
+		title: 'Current, and honest about it',
+		body: 'The freight tools use the NMFC density scale as restructured in July 2025 and the parcel rounding rules as they stand now. Where a figure is indicative rather than binding, the page says so.',
 	},
 ];
 
 const steps = [
-	{ title: 'Type your details', body: 'Bill lines or bag dimensions — a handful of fields, sensible defaults, presets for the common cases.' },
-	{ title: 'Watch it update live', body: 'The document, die-line preview and sheet math redraw as you type. No “calculate” button, no page reloads.' },
-	{ title: 'Download and go', body: 'An A4 PDF for the bill; real-scale SVG and PNG for the die-line. Files are generated on the spot.' },
+	{ title: 'Type your details', body: 'Dimensions and weight, bill lines or bag measurements — a handful of fields with sensible defaults.' },
+	{ title: 'Watch it update live', body: 'The class, the document and the die-line preview redraw as you type. No “calculate” button, no page reloads.' },
+	{ title: 'Copy it or download it', body: 'A one-line summary for the bill of lading, an A4 PDF for the bill, real-scale SVG for the die-line.' },
 ];
 
 const audiences = [
-	{ title: 'Freelancers & consultants', body: 'A clean Bill of Supply when you are below the GST threshold or under composition.' },
-	{ title: 'Retail suppliers', body: 'Correctly worded documents for exempt goods and composition-scheme sales.' },
-	{ title: 'Digital designers', body: 'Structural templates at 1:1 scale, ready for Illustrator, Affinity or Inkscape.' },
-	{ title: 'Packaging manufacturers', body: 'Material-aware allowances and parent-sheet yield to quote jobs faster.' },
+	{ title: 'Shippers & ecommerce sellers', body: 'Freight class before you book, and billable weight before the invoice surprises you.' },
+	{ title: 'Freight brokers & 3PLs', body: 'A fast density check, a commodity reference, and a bill of lading you can hand to the driver.' },
+	{ title: 'Buyers & operations teams', body: 'A purchase order your vendor can work from and your AP team can match an invoice against.' },
+	{ title: 'Freelancers & small businesses', body: 'A clean Bill of Supply when you are below the GST threshold or under composition.' },
+	{ title: 'Designers & packaging makers', body: 'Structural templates at 1:1 scale, ready for Illustrator, Affinity or Inkscape.' },
 ];
 
 const faqs = [
 	{
 		question: 'Is VendorDesk really free?',
-		answer: 'Yes. Every tool on this site is free to use with no account, no watermark and no download limit. We may show unobtrusive advertising to keep the lights on.',
+		answer:
+			'Yes. Every tool on this site is free to use with no account, no watermark and no download limit. We may show unobtrusive advertising to keep the lights on.',
 	},
 	{
-		question: 'Which bills can I generate here?',
+		question: 'Which freight tools are here?',
 		answer:
-			'A <a href="/unregistered-vendor-bill-of-supply">bill of supply</a> — the GST document used when no tax may be charged: by composition dealers (including restaurants under composition), for exempt or nil-rated goods, and by small sellers below the registration threshold. It downloads as an A4 PDF. This is not a tax-invoice tool, so if you are registered and charging CGST/SGST or IGST, you need a tax invoice instead.',
+			'A <a href="/freight-class-calculator">freight class calculator</a> that returns density and the NMFC class, the <a href="/freight-class-chart">full freight class chart</a>, an <a href="/nmfc-code-lookup">NMFC code lookup</a> for common commodities, and a <a href="/dimensional-weight-calculator">dimensional weight calculator</a> for UPS, FedEx and USPS parcels. If you are new to classification, start with <a href="/what-is-freight-class">what freight class is</a>.',
+	},
+	{
+		question: 'Which document generators are here?',
+		answer:
+			'A <a href="/bill-of-lading-generator">bill of lading generator</a> for LTL shipments and a <a href="/purchase-order-generator">purchase order generator</a> for procurement, both producing a PDF built on your device. There is also a <a href="/unregistered-vendor-bill-of-supply">GST bill of supply generator</a> and a <a href="/paper-bag-die-line-generator">paper bag dieline generator</a> for businesses in India.',
+	},
+	{
+		question: 'Are the freight figures up to date?',
+		answer:
+			'The freight class tools use the NMFC density provision as restructured by the NMFTA in Docket 2025-1, effective 19 July 2025 — thirteen subprovisions rather than the older eleven. The parcel calculator applies the whole-inch round-up that UPS, FedEx and USPS all now use, and the USPS one-cubic-foot threshold introduced in July 2026. Classification is ultimately your carrier’s call, so confirm before booking.',
 	},
 	{
 		question: 'Do you store what I type into a tool?',
@@ -57,9 +83,9 @@ const faqs = [
 			'No. The tools run entirely in your browser. Some tools can remember your last inputs in your own browser’s local storage so you can continue later — that data stays on your device and you can clear it at any time. Read the <a href="/privacy-policy">privacy policy</a>.',
 	},
 	{
-		question: 'Can I rely on the outputs for production or filing?',
+		question: 'Can I rely on the outputs for production, filing or booking?',
 		answer:
-			'The tools are precise, but they are estimation and layout aids. Always proof a physical packaging mock-up and confirm tax documents with your accountant. See the <a href="/terms-of-service">terms of service</a>.',
+			'The tools are precise, but they are estimation and layout aids. Confirm freight classification with your carrier, proof a physical packaging mock-up, and check tax documents with your accountant. See the <a href="/terms-of-service">terms of service</a>.',
 	},
 	{
 		question: 'Will there be more tools?',
@@ -82,6 +108,8 @@ const schema = [
 		items: TOOLS.map((t) => ({ name: t.name, path: t.href, description: t.description })),
 	}),
 ];
+
+const shippingExtras = [FREIGHT_CHART, NMFC_LOOKUP];
 ---
 
 <Layout title={title} description={description} schema={schema} titleTemplate={false}>
@@ -93,21 +121,20 @@ const schema = [
 			<div class="min-w-0 max-w-2xl">
 				<p class="eyebrow animate-fade-up">Free · No sign-up · Runs entirely in your browser</p>
 				<h1 class="mt-4 text-hero text-ink animate-fade-up" style="animation-delay: 80ms">
-					Lightning‑fast bill and dieline generators for independent businesses.
+					Lightning‑fast shipping and business document tools.
 				</h1>
 				<p class="mt-6 max-w-xl text-lead text-ink-2 animate-fade-up" style="animation-delay: 160ms">
-					Two free online tools that do one job perfectly: a <strong class="font-semibold text-ink">bill of supply
-					generator</strong> that downloads a GST-compliant PDF, and a <strong class="font-semibold text-ink">paper bag
-					dieline generator</strong> that exports a real-scale SVG. Type your numbers, download the file, get on with your
-					day.
+					Work out an <strong class="font-semibold text-ink">LTL freight class</strong> or a
+					<strong class="font-semibold text-ink">parcel&rsquo;s billable weight</strong> in seconds, then generate the paperwork that
+					goes with it — a bill of lading or a purchase order. Type your numbers, take the answer, get on with your day.
 				</p>
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-up" style="animation-delay: 240ms">
-					<a href={BILL.href} class="btn btn-primary btn-lg">Create a Bill of Supply</a>
-					<a href={DIELINE.href} class="btn btn-secondary btn-lg">Generate a bag dieline</a>
+					<a href={FREIGHT_CLASS.href} class="btn btn-primary btn-lg">Calculate freight class</a>
+					<a href={DIM_WEIGHT.href} class="btn btn-secondary btn-lg">Calculate DIM weight</a>
 				</div>
 				<ul class="mt-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-2.5 text-caption text-ink-2 animate-fade-up" style="animation-delay: 320ms">
 					{
-						['No account', 'Nothing uploaded', 'Real-scale exports', 'Light & dark mode'].map((item) => (
+						['No account', 'Nothing uploaded', '2025 NMFC scale', 'Light & dark mode'].map((item) => (
 							<li class="flex items-center gap-2">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0 text-success">
 									<path d="M5 12.5l4.5 4.5L19 7.5" />
@@ -119,16 +146,35 @@ const schema = [
 				</ul>
 			</div>
 
-			<div class="relative min-w-0 animate-fade-up" style="animation-delay: 200ms">
+			{/* A static mock of the calculator's result panel: it advertises the flagship tool far
+			    more directly than a decorative illustration, and costs nothing extra to ship. */}
+			<div class="relative min-w-0 animate-fade-up" style="animation-delay: 200ms" aria-hidden="true">
 				<div class="relative rounded-xl border border-hairline bg-surface p-4 sm:p-8">
-					<div class="rounded-lg bg-parchment p-4 sm:p-6">
-						<BillArt animate class="mx-auto h-auto w-full" />
+					<div class="rounded-lg bg-parchment p-5 sm:p-6">
+						<p class="eyebrow">Your freight class</p>
+						<div class="mt-3 flex flex-wrap items-end gap-x-4 gap-y-1">
+							<p class="tnum text-[clamp(3rem,9vw,4.5rem)] leading-[0.9] font-semibold tracking-[-0.03em] text-ink">85</p>
+							<p class="text-caption text-ink-2">
+								Density <span class="tnum font-semibold text-ink">12.7</span> lb/ft³<br />
+								Sub <span class="tnum font-semibold text-ink">8</span> · 12 but less than 15
+							</p>
+						</div>
+						<dl class="tnum mt-5 grid grid-cols-2 gap-x-5 gap-y-2.5 border-t border-hairline pt-4 text-caption">
+							<div>
+								<dt class="text-fine text-ink-2">Cubic feet</dt>
+								<dd class="font-semibold text-ink">66.7 ft³</dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">Shipment</dt>
+								<dd class="font-semibold text-ink">850 lb · 1 pallet</dd>
+							</div>
+						</dl>
 					</div>
 					<div class="pointer-events-none absolute top-6 left-6 hidden rounded-full border border-hairline bg-surface px-3 py-1.5 text-fine font-semibold text-ink-2 sm:block">
-						Composition dealer · Rule 49 format
+						48 × 40 × 60 in
 					</div>
 					<div class="pointer-events-none absolute right-6 bottom-6 hidden rounded-full bg-primary px-3 py-1.5 text-fine font-semibold text-on-primary sm:block">
-						A4 PDF · Free
+						2025 NMFC scale
 					</div>
 				</div>
 			</div>
@@ -140,19 +186,59 @@ const schema = [
 		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
 			<div class="max-w-2xl">
 				<p class="eyebrow">The tools</p>
-				<h2 id="tools-heading" class="mt-3 text-display text-ink">Free online bill and dieline generators</h2>
+				<h2 id="tools-heading" class="mt-3 text-display text-ink">Free shipping calculators and document generators</h2>
 				<p class="mt-4 text-lead text-ink-2">
-					Each one replaces a bloated SaaS sign-up flow with a page that is ready the moment it loads — no account, no
-					watermark, no limit on downloads.
+					Each one replaces a bloated SaaS sign-up flow with a page that is ready the moment it loads — no account, no watermark,
+					no limit on downloads.
 				</p>
 			</div>
-			<div class="mt-10 grid gap-5 md:grid-cols-2 md:grid-rows-[repeat(6,auto)] md:gap-x-6 md:gap-y-0">
-				<ToolCard tool={BILL} index={0}>
-					<BillArt slot="art" class="h-auto w-[86%]" />
-				</ToolCard>
-				<ToolCard tool={DIELINE} index={1}>
-					<DielineArt slot="art" class="h-auto w-[86%]" />
-				</ToolCard>
+
+			<!-- Shipping & Freight -->
+			<div class="mt-12">
+				<h3 class="text-title text-ink">{GROUP_LABELS.shipping}</h3>
+				<p class="mt-2 max-w-prose text-body text-ink-2">
+					Classification and weight, for pallets and parcels. Built on the current NMFC density scale and the carrier rounding
+					rules as they stand today.
+				</p>
+				<div class="mt-6 grid gap-4 md:grid-cols-2 md:gap-x-6">
+					{/* The flagship spans the row; everything else sits in the two-column grid below it. */}
+					<div class="md:col-span-2">
+						<ToolCardCompact tool={FREIGHT_CLASS} featured />
+					</div>
+					<ToolCardCompact tool={DIM_WEIGHT} />
+					{shippingExtras.map((tool) => <ToolCardCompact tool={tool} />)}
+					{ARTICLES.map((a) => <ToolCardCompact tool={a} kind="article" />)}
+				</div>
+			</div>
+
+			<!-- Business Documents -->
+			<div class="mt-16">
+				<h3 class="text-title text-ink">{GROUP_LABELS.documents}</h3>
+				<p class="mt-2 max-w-prose text-body text-ink-2">
+					Paperwork that usually costs a subscription. The bill of lading picks up where the freight class calculator leaves
+					off — the class you worked out lands straight on the document.
+				</p>
+				<div class="mt-6 grid gap-4 md:grid-cols-2 md:gap-x-6">
+					<ToolCardCompact tool={BOL} />
+					<ToolCardCompact tool={PURCHASE_ORDER} />
+				</div>
+
+				{/* The Indian tools are a different market, not a different quality tier: labelled so a
+				    US visitor can skip them and an Indian visitor can find them. */}
+				<div class="mt-14">
+					<h4 class="text-[1.0625rem] font-semibold text-ink">For businesses in India</h4>
+					<p class="mt-2 max-w-prose text-body text-ink-2">
+						GST-compliant billing for sellers below the threshold or under composition, and a print-ready packaging dieline.
+					</p>
+					<div class="mt-6 grid gap-5 md:grid-cols-2 md:grid-rows-[repeat(6,auto)] md:gap-x-6 md:gap-y-0">
+						<ToolCard tool={BILL} index={0}>
+							<BillArt slot="art" class="h-auto w-[86%]" />
+						</ToolCard>
+						<ToolCard tool={DIELINE} index={1}>
+							<DielineArt slot="art" class="h-auto w-[86%]" />
+						</ToolCard>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -207,14 +293,29 @@ const schema = [
 		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
 			<div class="max-w-2xl">
 				<p class="eyebrow">Made for</p>
-				<h2 id="audience-heading" class="mt-3 text-display text-ink">People who bill, print and ship for themselves.</h2>
+				<h2 id="audience-heading" class="mt-3 text-display text-ink">People who ship, bill and print for themselves.</h2>
 			</div>
-			<ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[repeat(2,auto)] lg:gap-x-4 lg:gap-y-0">
+			{/*
+			  Five cards laid over a six-column grid: three spanning two columns on the top row,
+			  two spanning three on the bottom, so both rows run flush to the edge instead of
+			  stranding a quarter-width card on a row of its own. The same reasoning covers the
+			  two-column breakpoint, where an odd last card runs the full width. Below `sm` the
+			  cards stack, which is what every phone from a 280px fold cover upwards gets.
+			  If the list stops being five, the spans below need revisiting.
+			*/}
+			<ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:grid-rows-[repeat(4,auto)]">
 				{
-					audiences.map((a) => (
-						<li class="card p-6 lg:row-span-2 lg:grid lg:grid-rows-subgrid">
+					audiences.map((a, i) => (
+						<li
+							class:list={[
+								'card p-6 lg:row-span-2 lg:grid lg:grid-rows-subgrid',
+								i < 3 ? 'lg:col-span-2' : 'lg:col-span-3',
+								i === audiences.length - 1 && audiences.length % 2 === 1 && 'sm:col-span-2',
+							]}
+						>
 							<h3 class="text-[1.0625rem] font-semibold text-ink">{a.title}</h3>
-							<p class="mt-2 text-caption text-ink-2">{a.body}</p>
+							{/* The subgrid row gap supplies this spacing at `lg`, so the margin would double it. */}
+							<p class="mt-2 text-caption text-ink-2 lg:mt-0">{a.body}</p>
 						</li>
 					))
 				}
@@ -238,11 +339,11 @@ const schema = [
 		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
 			<div class="max-w-xl">
 				<h2 class="text-display text-on-tile">Start with the tool you need today.</h2>
-				<p class="mt-3 text-body text-on-tile-2">Both are free, both are instant, and neither will ask you for an email address.</p>
+				<p class="mt-3 text-body text-on-tile-2">All free, all instant, and none of them will ask you for an email address.</p>
 			</div>
 			<div class="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row">
-				<a href={BILL.href} class="btn btn-primary">Bill of Supply generator</a>
-				<a href={DIELINE.href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Paper bag dieline</a>
+				<a href={FREIGHT_CLASS.href} class="btn btn-primary">Freight class calculator</a>
+				<a href={BOL.href} class="btn border border-white/30 text-on-tile hover:bg-white/10">Bill of lading generator</a>
 			</div>
 		</div>
 	</section>

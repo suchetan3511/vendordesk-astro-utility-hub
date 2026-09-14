@@ -29,6 +29,18 @@ export default defineConfig({
 			filter: (page) => !/\/(404|500)$/.test(page),
 			changefreq: 'monthly',
 			priority: 0.7,
+			// Priority is a hint about relative importance within the site, not a ranking lever.
+			// The homepage leads, the freight class calculator is the highest-intent page, and
+			// the remaining tools and guides sit above the legal boilerplate.
+			serialize(item) {
+				const path = new URL(item.url).pathname.replace(/\/$/, '');
+				if (path === '') item.priority = 1.0;
+				// The two highest-intent pages: the flagship calculator and the document it feeds.
+				else if (/^\/(freight-class-calculator|bill-of-lading-generator)$/.test(path)) item.priority = 0.9;
+				else if (/^\/(privacy-policy|terms-of-service)$/.test(path)) item.priority = 0.4;
+				else item.priority = 0.8;
+				return item;
+			},
 		}),
 	],
 	vite: {

@@ -12,11 +12,24 @@ interface Props {
 	schema?: Record<string, unknown> | Record<string, unknown>[];
 	ogImage?: string;
 	noindex?: boolean;
+	/** BCP 47 language tag. The site spans two markets, so pages set their own. */
+	lang?: string;
+	/** Open Graph locale for this page, e.g. en_US or en_IN. */
+	ogLocale?: string;
 	/** When false the title is used verbatim (homepage). */
 	titleTemplate?: boolean;
 }
 
-const { title, description, schema, ogImage = '/og.png', noindex = false, titleTemplate = true } = Astro.props;
+const {
+	title,
+	description,
+	schema,
+	ogImage = '/og.png',
+	noindex = false,
+	titleTemplate = true,
+	lang = 'en',
+	ogLocale = 'en_US',
+} = Astro.props;
 
 // The canonical is the clean, extensionless, slash-free URL that .htaccess actually serves
 // — never the file Astro happens to have written. Under `build.format: 'file'` the build-time
@@ -37,7 +50,7 @@ const graph = [website(), organization(), ...(schema ? (Array.isArray(schema) ? 
 ---
 
 <!doctype html>
-<html lang="en-IN">
+<html lang={lang}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -82,7 +95,7 @@ const graph = [website(), organization(), ...(schema ? (Array.isArray(schema) ? 
 		<link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content={SITE.name} />
-		<meta property="og:locale" content={SITE.locale} />
+		<meta property="og:locale" content={ogLocale} />
 		<meta property="og:title" content={fullTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />

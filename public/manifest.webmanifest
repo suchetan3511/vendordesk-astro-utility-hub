@@ -1,13 +1,13 @@
 {
-	"name": "VendorDesk — Bill of Supply & Dieline Generators",
+	"name": "VendorDesk — Shipping & Business Document Tools",
 	"short_name": "VendorDesk",
-	"description": "Free bill of supply generator and paper bag dieline generator that run entirely in your browser.",
+	"description": "Free freight class and dimensional weight calculators, plus bill of lading, purchase order and billing generators, that run entirely in your browser.",
 	"start_url": "/",
 	"scope": "/",
 	"display": "standalone",
 	"background_color": "#ffffff",
 	"theme_color": "#f5f5f7",
-	"lang": "en-IN",
+	"lang": "en",
 	"dir": "ltr",
 	"categories": ["business", "productivity", "utilities"],
 	"icons": [
@@ -24,6 +24,22 @@
 		}
 	],
 	"shortcuts": [
+		{
+			"name": "Calculate freight class",
+			"url": "/freight-class-calculator"
+		},
+		{
+			"name": "Calculate dimensional weight",
+			"url": "/dimensional-weight-calculator"
+		},
+		{
+			"name": "Create a bill of lading",
+			"url": "/bill-of-lading-generator"
+		},
+		{
+			"name": "Raise a purchase order",
+			"url": "/purchase-order-generator"
+		},
 		{
 			"name": "Create a Bill of Supply",
 			"url": "/unregistered-vendor-bill-of-supply"
