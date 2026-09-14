@@ -504,7 +504,10 @@ export function initBillOfSupplyTool(root: HTMLElement) {
 		scaleRaf = requestAnimationFrame(applyScale);
 	}
 	function applyScale() {
-		const available = viewport.clientWidth;
+		// clientWidth includes the viewport's padding; the document has to fit inside it, or the
+		// scaled page overflows by exactly that padding and gets clipped on the right.
+		const style = getComputedStyle(viewport);
+		const available = Math.max(0, viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
 		const docWidth = doc.offsetWidth || 794;
 		const k = Math.min(1, available / docWidth);
 		scaler.style.transform = `scale(${k})`;
