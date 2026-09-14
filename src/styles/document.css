@@ -1,0 +1,426 @@
+/*
+ * Shared styling for the US document generators (bill of lading, purchase order).
+ *
+ * Two hard constraints shape this file:
+ *   1. Hex colours only. html2canvas cannot parse `oklch()` or `color-mix()`, which the rest
+ *      of the site's palette uses, so the rendered document keeps its own literal colours and
+ *      looks identical in light and dark mode.
+ *   2. US Letter at 96dpi is 816 x 1056px. The document is laid out at that size and scaled
+ *      down to fit its viewport by transform, so the PDF rasterises at full fidelity.
+ */
+
+.vd-doc {
+	width: 816px;
+	min-height: 1056px;
+	box-sizing: border-box;
+	padding: 48px 52px 40px;
+	background: #ffffff;
+	color: #1d1d1f;
+	font-family: 'Inter Variable', Inter, Helvetica, Arial, sans-serif;
+	font-size: 12.5px;
+	line-height: 1.45;
+	letter-spacing: -0.005em;
+	display: flex;
+	flex-direction: column;
+}
+.vd-doc * {
+	box-sizing: border-box;
+}
+.vd-doc [hidden] {
+	display: none !important;
+}
+
+/* Keeps a logical group from being split across a page boundary in the PDF. */
+.vd-block {
+	break-inside: avoid;
+	page-break-inside: avoid;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.vd-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 28px;
+	padding-bottom: 16px;
+	border-bottom: 1.5px solid #1d1d1f;
+}
+.vd-title {
+	margin: 0;
+	font-size: 26px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+}
+.vd-subtitle {
+	margin: 5px 0 0;
+	color: #6e6e73;
+	font-size: 11.5px;
+}
+.vd-issuer {
+	margin: 10px 0 0;
+	font-size: 12px;
+}
+.vd-issuer strong {
+	display: block;
+	font-size: 13.5px;
+	font-weight: 600;
+}
+
+/* The boxed reference block top-right: document number, dates, terms. */
+.vd-meta {
+	border-collapse: collapse;
+	min-width: 248px;
+	font-size: 11.5px;
+}
+.vd-meta th,
+.vd-meta td {
+	border: 1px solid #d2d2d7;
+	padding: 4px 9px;
+	text-align: left;
+	vertical-align: top;
+}
+.vd-meta th {
+	background: #f5f5f7;
+	font-weight: 600;
+	color: #6e6e73;
+	white-space: nowrap;
+	width: 42%;
+}
+.vd-meta td {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Parties ----------------------------------------------------------------- */
+
+.vd-parties {
+	display: grid;
+	gap: 20px;
+	padding: 16px 0;
+	border-bottom: 1px solid #d2d2d7;
+}
+.vd-parties-2 {
+	grid-template-columns: 1fr 1fr;
+}
+.vd-parties-3 {
+	grid-template-columns: 1fr 1fr 1fr;
+}
+.vd-party h4,
+.vd-section h4 {
+	margin: 0 0 5px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #6e6e73;
+}
+.vd-party p {
+	margin: 0;
+	font-size: 12px;
+}
+.vd-party .vd-name {
+	font-weight: 600;
+	font-size: 13px;
+}
+.vd-party .vd-pre {
+	white-space: pre-line;
+}
+.vd-party p:empty {
+	display: none;
+}
+
+/* Generic labelled strip, e.g. carrier details or freight terms. */
+.vd-strip {
+	display: grid;
+	gap: 16px;
+	padding: 14px 0;
+	border-bottom: 1px solid #d2d2d7;
+}
+.vd-strip-4 {
+	grid-template-columns: repeat(4, 1fr);
+}
+.vd-strip-3 {
+	grid-template-columns: repeat(3, 1fr);
+}
+.vd-field {
+	min-width: 0;
+}
+.vd-field h4 {
+	margin: 0 0 3px;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #6e6e73;
+}
+.vd-field p {
+	margin: 0;
+	font-size: 12px;
+	overflow-wrap: anywhere;
+}
+
+/* Line items -------------------------------------------------------------- */
+
+.vd-items {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 18px;
+	font-size: 11.5px;
+}
+.vd-items caption {
+	caption-side: top;
+	text-align: left;
+	margin-bottom: 6px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #6e6e73;
+}
+.vd-items th,
+.vd-items td {
+	border-bottom: 1px solid #d2d2d7;
+	padding: 7px 8px;
+	text-align: left;
+	vertical-align: top;
+}
+.vd-items thead th {
+	border-bottom: 1.5px solid #1d1d1f;
+	background: #f5f5f7;
+	font-weight: 600;
+	font-size: 10px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #6e6e73;
+	white-space: nowrap;
+}
+.vd-items .vd-num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.vd-items .vd-mid {
+	text-align: center;
+	white-space: nowrap;
+}
+.vd-items tfoot td {
+	border-bottom: 0;
+	border-top: 1.5px solid #1d1d1f;
+	padding-top: 8px;
+	font-weight: 600;
+	font-size: 12px;
+}
+.vd-items .vd-desc {
+	width: 40%;
+}
+.vd-empty-row td {
+	color: #86868b;
+	font-style: italic;
+	text-align: center;
+	padding: 18px 8px;
+}
+
+/* Totals ------------------------------------------------------------------ */
+
+.vd-totals {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+.vd-totals table {
+	border-collapse: collapse;
+	min-width: 290px;
+	font-size: 12px;
+}
+.vd-totals th,
+.vd-totals td {
+	padding: 5px 0 5px 20px;
+	text-align: right;
+}
+.vd-totals th {
+	font-weight: 400;
+	color: #6e6e73;
+	text-align: left;
+	padding-left: 0;
+}
+.vd-totals td {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.vd-totals .vd-grand th,
+.vd-totals .vd-grand td {
+	border-top: 1.5px solid #1d1d1f;
+	padding-top: 9px;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d1d1f;
+}
+
+/* Footer, notes and signatures -------------------------------------------- */
+
+.vd-section {
+	margin-top: 18px;
+}
+.vd-section p {
+	margin: 0;
+	font-size: 11.5px;
+	white-space: pre-line;
+}
+
+.vd-legal {
+	margin-top: 18px;
+	padding: 10px 12px;
+	border: 1px solid #d2d2d7;
+	border-radius: 6px;
+	background: #f5f5f7;
+	font-size: 9.5px;
+	line-height: 1.5;
+	color: #424245;
+}
+.vd-legal h4 {
+	margin: 0 0 4px;
+	font-size: 9.5px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #6e6e73;
+}
+.vd-legal p {
+	margin: 0 0 6px;
+}
+.vd-legal p:last-child {
+	margin-bottom: 0;
+}
+
+/* Pushes the signature band to the foot of the first page when content is short. */
+.vd-spacer {
+	flex: 1 1 auto;
+	min-height: 16px;
+}
+
+.vd-signs {
+	display: grid;
+	gap: 28px;
+	margin-top: 22px;
+	padding-top: 16px;
+	border-top: 1px solid #d2d2d7;
+}
+.vd-signs-2 {
+	grid-template-columns: 1fr 1fr;
+}
+.vd-sign-line {
+	height: 44px;
+	border-bottom: 1px solid #1d1d1f;
+	margin-bottom: 5px;
+	display: flex;
+	align-items: flex-end;
+	overflow: hidden;
+}
+/*
+ * Drawn ink. The pad exports a trimmed transparent PNG, so it only has to be told not to
+ * outgrow the ruled line — the aspect ratio is whatever was signed.
+ */
+.vd-sign-line img {
+	display: block;
+	max-height: 42px;
+	max-width: 100%;
+	width: auto;
+	object-fit: contain;
+}
+.vd-sign-typed {
+	font-family: Georgia, 'Times New Roman', serif;
+	font-style: italic;
+	font-size: 20px;
+	line-height: 1.1;
+	padding-bottom: 3px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.vd-sign h4 {
+	margin: 0;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #6e6e73;
+}
+.vd-sign p {
+	margin: 2px 0 0;
+	font-size: 11px;
+	color: #6e6e73;
+}
+
+.vd-fine {
+	margin: 20px 0 0;
+	font-size: 9.5px;
+	color: #86868b;
+}
+
+/* Print ------------------------------------------------------------------- */
+
+/*
+ * Printing strips the site chrome and prints the scaled preview at full size. The selectors
+ * mirror the page structure: main > #tool > [data-doc-tool] > (form | preview card).
+ */
+@media (max-width: 1023px) {
+	body:has([data-doc-tool]) {
+		padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+	}
+}
+
+@media print {
+	body:has([data-doc-tool]) {
+		padding-bottom: 0 !important;
+	}
+	body:has([data-doc-tool]) > * {
+		display: none !important;
+	}
+	body:has([data-doc-tool]) > main {
+		display: block !important;
+	}
+	body:has([data-doc-tool]) main > * {
+		display: none !important;
+	}
+	body:has([data-doc-tool]) main > #tool {
+		display: block !important;
+		background: #fff !important;
+		padding: 0 !important;
+	}
+	#tool > * {
+		display: none !important;
+	}
+	#tool > [data-doc-tool] {
+		display: block !important;
+		padding: 0 !important;
+	}
+	[data-doc-tool] > form,
+	[data-doc-tool] .card > :not(#doc-viewport),
+	[data-doc-tool] .card + .card {
+		display: none !important;
+	}
+	[data-doc-tool] .card {
+		border: 0 !important;
+		border-radius: 0 !important;
+		overflow: visible !important;
+	}
+	#doc-viewport {
+		padding: 0 !important;
+		background: #fff !important;
+		overflow: visible !important;
+	}
+	#doc-scaler {
+		transform: none !important;
+		height: auto !important;
+	}
+	.vd-doc {
+		width: 100%;
+		min-height: 0;
+		padding: 0;
+	}
+	@page {
+		size: letter;
+		margin: 12mm;
+	}
+}
