@@ -1,0 +1,423 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { DIM_WEIGHT, FREIGHT_CLASS } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { DEFAULT_DIM_INPUT, DIM_PROFILES, OVERSIZE_REFERENCE } from '../lib/dim';
+
+const tool = DIM_WEIGHT;
+const title = 'Dimensional Weight Calculator — 2026 DIM Rules';
+const description =
+	'Calculate dimensional weight and billable weight for UPS, FedEx and USPS. Free DIM weight calculator with the whole-inch round-up and USPS threshold.';
+
+const faqs = [
+	{
+		question: 'What is dimensional weight?',
+		answer:
+			'Dimensional weight, or DIM weight, is a pricing figure based on the space a package occupies rather than what it weighs. Carriers charge on whichever is greater — dimensional or actual weight — so that large, light packages are not shipped at a loss.',
+	},
+	{
+		question: 'How is dimensional weight calculated?',
+		answer:
+			'Round each dimension up to the next whole inch, multiply length by width by height, then divide by the carrier’s DIM divisor. The result, rounded up to the next whole pound, is the dimensional weight. UPS and FedEx have rounded each dimension up since 18 August 2025, and USPS since 12 July 2026.',
+	},
+	{
+		question: 'What is a DIM divisor?',
+		answer:
+			'A number set by the carrier that converts cubic inches into billable pounds. Lower divisors produce higher dimensional weights and therefore higher costs. Divisors vary by carrier, service and negotiated account terms. UPS, FedEx and USPS all publish 139 for US domestic parcels, while UPS retail counter shipments and many negotiated contracts use 166.',
+	},
+	{
+		question: 'What is billable weight?',
+		answer:
+			'The weight your shipment is actually charged on — the greater of the actual weight and the dimensional weight. One exception matters: USPS applies dimensional weight only to packages larger than one cubic foot, so a small box is billed on its actual weight no matter how light it is.',
+	},
+	{
+		question: 'Does dimensional weight apply to every USPS package?',
+		answer:
+			'No. Since 12 July 2026 USPS applies dimensional weight only to Priority Mail Express, Priority Mail, USPS Ground Advantage and Parcel Select packages larger than 1,728 cubic inches — one cubic foot. At or below that size USPS bills the actual weight. Because dimensions round up before the volume is measured, a package can cross that threshold on rounding alone.',
+	},
+	{
+		question: 'How do I reduce dimensional weight charges?',
+		answer:
+			'Use the smallest box that safely fits the contents. Removing even an inch from one dimension reduces the cubic volume and can lower the billable weight — and because every fraction now rounds up, a box measured at 12.1 inches is billed as 13, so trimming to a whole-inch size is worth doing.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true, market: tool.market }),
+	softwareApplication({
+		name: tool.name,
+		path: tool.href,
+		description,
+		category: 'BusinessApplication',
+		features: tool.features,
+		keywords: tool.keywords,
+		market: tool.market,
+	}),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+
+const dims = [
+	['dim-length', 'Length', DEFAULT_DIM_INPUT.length],
+	['dim-width', 'Width', DEFAULT_DIM_INPUT.width],
+	['dim-height', 'Height', DEFAULT_DIM_INPUT.height],
+] as const;
+---
+
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">Parcel shipping · Free · No sign-up</p>
+				<h1 class="mt-3 text-display text-ink">Dimensional Weight Calculator</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Work out the dimensional weight, the billable weight and the girth of a parcel for UPS, FedEx or USPS. The calculator
+					applies the whole-inch round-up all three carriers now use, and the USPS one-cubic-foot threshold that stops small boxes
+					being rated on volume.
+				</p>
+			</div>
+			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Highlights">
+				<li class="chip">Free · no sign-up</li>
+				<li class="chip">UPS · FedEx · USPS</li>
+				<li class="chip">Whole-inch round-up</li>
+				<li class="chip">Custom divisor</li>
+				<li class="chip">Girth &amp; oversize</li>
+			</ul>
+		</div>
+	</section>
+
+	<!-- Tool -->
+	<section id="tool" class="bg-parchment" aria-labelledby="tool-heading">
+		<h2 id="tool-heading" class="sr-only">Dimensional weight and billable weight calculator</h2>
+		<div
+			class="mx-auto grid max-w-page gap-6 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start"
+			data-dim-tool
+		>
+			<!-- Inputs -->
+			<form class="card p-5 sm:p-6" novalidate autocomplete="off" aria-label="Package dimensions and weight">
+				<div class="flex items-center justify-between gap-3">
+					<h3 class="text-[1.0625rem] font-semibold text-ink">Your package</h3>
+					<button type="button" class="btn-quiet" data-reset>Reset</button>
+				</div>
+
+				<div class="mt-5">
+					<label for="dim-carrier" class="field-label">Carrier and service</label>
+					<select id="dim-carrier" name="dim-carrier" class="field">
+						{DIM_PROFILES.map((p) => <option value={p.id}>{p.label}</option>)}
+					</select>
+					<p class="field-hint" data-carrier-note>{DIM_PROFILES[0].note}</p>
+				</div>
+
+				<div class="mt-5" data-divisor-row hidden>
+					<label for="dim-divisor" class="field-label">DIM divisor</label>
+					<input id="dim-divisor" name="dim-divisor" type="number" inputmode="numeric" min="1" step="1" value="139" class="field tnum" />
+					<label for="dim-round" class="mt-3 flex min-h-11 items-center gap-3 text-caption text-ink">
+						<input id="dim-round" type="checkbox" class="checkbox" checked />
+						Round each dimension up to the next whole inch
+					</label>
+				</div>
+
+				<div class="mt-6 flex items-center justify-between gap-4">
+					<p class="field-label mb-0">Dimensions</p>
+					<div class="segmented w-auto" role="group" aria-label="Length units">
+						<button type="button" data-length-unit="in" aria-pressed="true">in</button>
+						<button type="button" data-length-unit="cm" aria-pressed="false">cm</button>
+					</div>
+				</div>
+				<div class="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
+					{
+						dims.map(([id, label, value]) => (
+							<div>
+								<label for={id} class="text-fine font-semibold text-ink-2">
+									{label}
+								</label>
+								<div class="relative mt-1">
+									<input id={id} name={id} type="number" inputmode="decimal" min="0.1" step="0.1" value={value} class="field tnum pr-9" required />
+									<span class="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-fine text-ink-3" data-length-label>
+										in
+									</span>
+								</div>
+							</div>
+						))
+					}
+				</div>
+				<p class="field-hint">Measure the outside of the box at its widest points, including any bulge.</p>
+
+				<div class="mt-6">
+					<div class="flex items-center justify-between gap-2">
+						<label for="dim-weight" class="field-label mb-0">Actual weight</label>
+						<div class="segmented w-auto" role="group" aria-label="Weight units">
+							<button type="button" data-weight-unit="lb" aria-pressed="true">lb</button>
+							<button type="button" data-weight-unit="kg" aria-pressed="false">kg</button>
+						</div>
+					</div>
+					<div class="relative mt-2">
+						<input
+							id="dim-weight"
+							name="dim-weight"
+							type="number"
+							inputmode="decimal"
+							min="0.1"
+							step="0.1"
+							value={DEFAULT_DIM_INPUT.weight}
+							class="field tnum pr-10"
+							required
+						/>
+						<span class="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-fine text-ink-3" data-weight-label>
+							lb
+						</span>
+					</div>
+				</div>
+
+				<p class="field-error" data-error hidden role="alert">Enter a positive number in every field to see a billable weight.</p>
+
+				<p class="mt-5 text-fine text-ink-3">Your figures never leave this device. Nothing is uploaded or stored.</p>
+			</form>
+
+			<!-- Result -->
+			<div class="grid gap-4 lg:sticky lg:top-20">
+				<div class="card p-5 sm:p-6">
+					<div data-empty>
+						<p class="text-body text-ink-2">Enter the package dimensions and weight to see the billable weight.</p>
+						<noscript>
+							<p class="mt-3 text-caption text-ink-2">
+								The calculator needs JavaScript. The formula, the divisors and the carrier rules are all set out below.
+							</p>
+						</noscript>
+					</div>
+
+					<div data-result hidden>
+						<p class="eyebrow">Billable weight</p>
+						<div class="mt-3 flex flex-wrap items-end gap-x-5 gap-y-2">
+							<p class="tnum text-[clamp(3.5rem,12vw,5.5rem)] leading-[0.9] font-semibold tracking-[-0.03em] text-ink">
+								<span data-out="billable">—</span><span class="text-[0.35em] font-normal text-ink-2"> lb</span>
+							</p>
+						</div>
+						<p class="mt-3 text-body font-semibold text-ink" data-out="verdict">—</p>
+
+						<dl class="tnum mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-hairline pt-5 text-caption sm:grid-cols-3">
+							<div>
+								<dt class="text-fine text-ink-2">Dimensional weight</dt>
+								<dd class="font-semibold text-ink"><span data-out="dimWeight">—</span></dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">Actual weight</dt>
+								<dd class="font-semibold text-ink"><span data-out="actualWeight">—</span> lb</dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">Divisor</dt>
+								<dd class="font-semibold text-ink" data-out="divisor">—</dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">Billed dimensions</dt>
+								<dd class="font-semibold text-ink" data-out="billedDims">—</dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">Cubic inches</dt>
+								<dd class="font-semibold text-ink" data-out="cubicInches">—</dd>
+							</div>
+							<div>
+								<dt class="text-fine text-ink-2">As measured</dt>
+								<dd class="font-semibold text-ink" data-out="measuredDims">—</dd>
+							</div>
+						</dl>
+
+						<div class="mt-5 rounded-md border border-hairline bg-parchment p-4" data-rounding-note hidden>
+							<p class="text-caption text-ink-2">
+								<strong class="font-semibold text-ink">Rounding changed your volume.</strong> Your measured dimensions
+								(<span class="tnum" data-out="measuredDims">—</span>) were rounded up to
+								<span class="tnum font-semibold text-ink" data-out="billedDims">—</span> before the calculation, because every
+								fraction of an inch rounds up to the next whole inch.
+							</p>
+						</div>
+
+						<div class="mt-3 rounded-md border border-hairline bg-parchment p-4" data-threshold-note hidden>
+							<p class="text-caption text-ink-2">
+								<strong class="font-semibold text-ink">Under the USPS threshold.</strong> This package is one cubic foot
+								(1,728 in³) or smaller, so USPS rates it on actual weight and dimensional weight does not apply.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<p class="text-fine text-ink-3">
+					Figures are indicative. Confirm divisors, thresholds and surcharges with your carrier before booking.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Girth -->
+	<section id="girth" class="border-t border-hairline bg-canvas" aria-labelledby="girth-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-24">
+			<div class="max-w-prose">
+				<p class="eyebrow">Oversize</p>
+				<h2 id="girth-heading" class="mt-3 text-title text-ink">Girth and length-plus-girth</h2>
+				<p class="mt-4 text-body text-ink-2">
+					Girth is the distance around the package at its thickest point, measured across the two smaller sides. Carriers add it
+					to the longest side to decide whether a parcel is oversized. The figures below update with the dimensions you entered
+					above, using the longest side as the length — which is how carriers measure it, whichever field you typed it into.
+				</p>
+			</div>
+
+			<div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-10">
+				<div class="card p-5 sm:p-6" data-dim-girth>
+					<dl class="tnum grid grid-cols-2 gap-x-6 gap-y-4 text-caption">
+						<div>
+							<dt class="text-fine text-ink-2">Longest side</dt>
+							<dd class="text-[1.0625rem] font-semibold text-ink"><span data-out="longestSide">—</span> in</dd>
+						</div>
+						<div>
+							<dt class="text-fine text-ink-2">Girth</dt>
+							<dd class="text-[1.0625rem] font-semibold text-ink"><span data-out="girth">—</span> in</dd>
+						</div>
+						<div class="col-span-2 border-t border-hairline pt-4">
+							<dt class="text-fine text-ink-2">Length + girth</dt>
+							<dd class="text-[1.375rem] font-semibold text-ink"><span data-out="lengthPlusGirth">—</span> in</dd>
+						</div>
+					</dl>
+					<p class="mt-4 text-fine text-ink-3">Girth = 2 × (width + height), using the two smaller dimensions.</p>
+				</div>
+
+				<div>
+					<h3 class="text-[1.0625rem] font-semibold text-ink">Where the surcharges start</h3>
+					<p class="mt-1 text-fine text-ink-2">
+						Published 2026 thresholds. These change most years and vary by service and contract — treat them as a prompt to check,
+						not as a quote.
+					</p>
+					<div class="mt-4 overflow-x-auto">
+						<table class="w-full border-collapse text-caption">
+							<caption class="sr-only">Oversize and additional handling thresholds by carrier</caption>
+							<thead>
+								<tr class="border-b border-hairline-strong">
+									<th scope="col" class="py-2.5 pr-4 text-left font-semibold text-ink-2">Carrier</th>
+									<th scope="col" class="py-2.5 pr-4 text-left font-semibold text-ink-2">Rule</th>
+									<th scope="col" class="py-2.5 text-left font-semibold text-ink-2">Threshold</th>
+								</tr>
+							</thead>
+							<tbody>
+								{
+									OVERSIZE_REFERENCE.map((row) => (
+										<tr class="border-b border-hairline last:border-b-0">
+											<td class="py-2.5 pr-4 font-semibold whitespace-nowrap text-ink">{row.carrier}</td>
+											<td class="py-2.5 pr-4 text-ink-2">{row.rule}</td>
+											<td class="py-2.5 text-ink-2">{row.threshold}</td>
+										</tr>
+									))
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Editorial -->
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<p class="eyebrow">How it works</p>
+				<h2 class="mt-3!">How dimensional weight is calculated</h2>
+				<p class="lede">
+					Carriers sell trailer and aircraft space, not just lifting capacity. A large box full of packing foam takes the room of
+					a heavy one while earning far less, so carriers convert volume into a weight and bill on whichever figure is higher.
+					That converted figure is the dimensional weight.
+				</p>
+				<ul>
+					<li><strong>Round each dimension up</strong> to the next whole inch. A 12.2-inch side is billed as 13.</li>
+					<li><strong>Multiply</strong> length by width by height to get cubic inches.</li>
+					<li><strong>Divide</strong> by the carrier’s DIM divisor.</li>
+					<li><strong>Round the result up</strong> to the next whole pound. That is the dimensional weight.</li>
+					<li><strong>Compare</strong> it with the actual weight. The greater of the two is the billable weight.</li>
+				</ul>
+
+				<h2>Two rules that catch people out</h2>
+				<p>
+					<strong>Fractions always round up, per dimension.</strong> FedEx began rounding every fractional inch up to the next
+					whole inch on 18 August 2025 and UPS matched; USPS adopted the same rule on 12 July 2026. This is not rounding to the
+					nearest inch — 8.01 inches becomes 9. Three dimensions rounding up together can add a surprising amount of billable
+					volume, which is why a box measured at 12.1 × 10.2 × 8.1 is rated as 13 × 11 × 9.
+				</p>
+				<p>
+					<strong>USPS applies dimensional weight only above one cubic foot.</strong> From 12 July 2026 the USPS divisor dropped
+					from 166 to 139 for Priority Mail Express, Priority Mail, Ground Advantage and Parcel Select — but only for packages
+					larger than 1,728 cubic inches. At or below that, USPS bills the actual weight however light the package is. Most
+					calculators apply the divisor to everything and over-report small boxes as a result. Note that because the round-up
+					happens first, rounding alone can push a package over the threshold.
+				</p>
+
+				<h2>Choosing the right divisor</h2>
+				<p>
+					A lower divisor produces a higher dimensional weight, so the divisor on your account matters more than almost any other
+					number in parcel pricing. UPS, FedEx and USPS all publish 139 for US domestic parcels. UPS walk-in retail counter
+					shipments use 166, and negotiated contracts frequently specify 166 or better — if yours does, enter it as a custom
+					divisor above.
+				</p>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr><th>Divisor</th><th>Where it applies</th><th>Effect</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>139</td><td>UPS Daily Rates, FedEx Express and Ground, USPS above one cubic foot</td><td>The current published default</td></tr>
+							<tr><td>166</td><td>UPS retail counter, and many negotiated contracts</td><td>About 19 % lower dimensional weight</td></tr>
+							<tr><td>Custom</td><td>Whatever your carrier agreement specifies</td><td>Check your rate sheet</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h2>Shipping pallets instead of parcels?</h2>
+				<p>
+					Dimensional weight is a parcel concept. LTL carriers solve the same problem — pricing bulky, light freight fairly — with
+					classification rather than a divisor. If your freight moves on a pallet, use the
+					<a href={FREIGHT_CLASS.href}>freight class calculator</a> instead.
+				</p>
+				<p class="callout">
+					Divisors, thresholds and surcharges change most years and vary by carrier, service level and negotiated account. Confirm
+					the current figures with your carrier before you rely on them.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Dimensional weight questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="dim-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Moving pallets, not parcels?</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Get the density and NMFC freight class for an LTL shipment, on the density scale as it stands after the 2025
+					restructuring.
+				</p>
+			</div>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the freight class calculator</a>
+		</div>
+	</section>
+</Layout>
+
+<script>
+	import { initDimWeightTool } from '../scripts/dim-weight';
+	// The girth panel sits in its own section, so the tool is initialised on <main> and finds
+	// both regions rather than being scoped to the calculator card.
+	const root = document.querySelector<HTMLElement>('main');
+	if (root && root.querySelector('[data-dim-tool]')) initDimWeightTool(root);
+</script>

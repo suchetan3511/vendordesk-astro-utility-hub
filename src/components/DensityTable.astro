@@ -1,0 +1,50 @@
+---
+import { bandLabel, type DensityBand } from '../lib/freight';
+
+interface Props {
+	bands: DensityBand[];
+	caption: string;
+	/** The NMFC scale is numbered by subprovision; the legacy chart is not. */
+	showSub?: boolean;
+	/** Marks rows so the calculator can highlight the one a result landed in. */
+	interactive?: boolean;
+	class?: string;
+}
+
+const { bands, caption, showSub = false, interactive = false, class: className = '' } = Astro.props;
+
+// Densest first reads better as a reference: class 50 is the one people are aiming for, and it
+// matches how every carrier prints the scale.
+const rows = [...bands].reverse();
+---
+
+{/* Wide tables scroll inside their own container so the page body never scrolls sideways at 360px. */}
+<div class={`overflow-x-auto ${className}`}>
+	<table class="w-full border-collapse text-caption">
+		<caption class="mb-3 text-left text-fine text-ink-2">{caption}</caption>
+		<thead>
+			<tr class="border-b border-hairline-strong">
+				{showSub && <th scope="col" class="py-2.5 pr-4 text-left font-semibold text-ink-2 whitespace-nowrap">Sub</th>}
+				<th scope="col" class="py-2.5 pr-4 text-left font-semibold text-ink-2 whitespace-nowrap">Density (lb/ft³)</th>
+				<th scope="col" class="py-2.5 text-right font-semibold text-ink-2 whitespace-nowrap">Class</th>
+			</tr>
+		</thead>
+		<tbody>
+			{
+				rows.map((band) => (
+					<tr
+						class="border-b border-hairline last:border-b-0 data-[match]:bg-primary/10"
+						data-density-row={interactive ? '' : undefined}
+						data-class={interactive ? String(band.class) : undefined}
+						data-min={interactive ? String(band.min) : undefined}
+						data-max={interactive ? (band.max === null ? '' : String(band.max)) : undefined}
+					>
+						{showSub && <td class="tnum py-2.5 pr-4 text-ink-3">{band.sub}</td>}
+						<td class="tnum py-2.5 pr-4 text-ink-2 whitespace-nowrap">{bandLabel(band)}</td>
+						<td class="tnum py-2.5 text-right font-semibold text-ink">{band.class}</td>
+					</tr>
+				))
+			}
+		</tbody>
+	</table>
+</div>
