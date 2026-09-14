@@ -1,6 +1,6 @@
 ---
 import Logo from './Logo.astro';
-import { BILL, NAV, SITE } from '../lib/site';
+import { FREIGHT_CLASS, NAV, SITE } from '../lib/site';
 
 const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
@@ -50,7 +50,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 			</button>
 
 			{/* Held back to lg: at md the four nav labels plus a button leave no room and the nav wraps. */}
-			<a href={BILL.href} class="btn btn-primary btn-sm hidden lg:inline-flex">Create a bill</a>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary btn-sm hidden lg:inline-flex">Calculate freight class</a>
 
 			<button
 				type="button"
@@ -90,7 +90,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
 					))
 				}
 			</ul>
-			<a href={BILL.href} class="btn btn-primary mt-4 w-full">Create a bill</a>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary mt-4 w-full">Calculate freight class</a>
 		</nav>
 	</div>
 </header>

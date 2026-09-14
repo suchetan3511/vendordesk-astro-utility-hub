@@ -1,4 +1,4 @@
-import { SITE } from './site';
+import { MARKET_NEUTRAL, SITE, type MarketMeta } from './site';
 
 type JsonLd = Record<string, unknown>;
 
@@ -6,6 +6,9 @@ const abs = (path: string) => new URL(path, SITE.url).toString();
 
 export const ORGANIZATION_ID = `${SITE.url}/#organization`;
 export const WEBSITE_ID = `${SITE.url}/#website`;
+
+/** Every market the site publishes for, for the site-level nodes that are not page-specific. */
+const SITE_LANGUAGES = ['en-US', 'en-IN'];
 
 export function organization(): JsonLd {
 	return {
@@ -20,7 +23,6 @@ export function organization(): JsonLd {
 			url: abs('/favicon.svg'),
 		},
 		description: SITE.description,
-		areaServed: 'IN',
 		contactPoint: {
 			'@type': 'ContactPoint',
 			email: SITE.email,
@@ -37,7 +39,7 @@ export function website(): JsonLd {
 		url: SITE.url,
 		name: SITE.name,
 		description: SITE.description,
-		inLanguage: 'en-IN',
+		inLanguage: SITE_LANGUAGES,
 		publisher: { '@id': ORGANIZATION_ID },
 	};
 }
@@ -49,9 +51,12 @@ export interface SoftwareAppInput {
 	category: string;
 	features: string[];
 	keywords?: string[];
+	/** Drives offer currency, countries supported and language. Defaults to the neutral market. */
+	market?: MarketMeta;
 }
 
 export function softwareApplication(app: SoftwareAppInput): JsonLd {
+	const market = app.market ?? MARKET_NEUTRAL;
 	return {
 		'@type': 'SoftwareApplication',
 		'@id': `${abs(app.path)}#app`,
@@ -65,7 +70,7 @@ export function softwareApplication(app: SoftwareAppInput): JsonLd {
 		offers: {
 			'@type': 'Offer',
 			price: '0',
-			priceCurrency: 'INR',
+			priceCurrency: market.currency,
 			availability: 'https://schema.org/InStock',
 		},
 		featureList: app.features,
@@ -74,19 +79,44 @@ export function softwareApplication(app: SoftwareAppInput): JsonLd {
 		availableOnDevice: 'Any device with a modern web browser',
 		// Accurate and worth stating: the tools are client-side, so nothing is uploaded or stored.
 		storageRequirements: 'None — files are generated in the browser and nothing is uploaded',
-		countriesSupported: 'IN',
+		countriesSupported: market.country,
 		usageInfo: abs('/terms-of-service'),
 		mainEntityOfPage: { '@id': `${abs(app.path)}#webpage` },
 		author: { '@id': ORGANIZATION_ID },
 		publisher: { '@id': ORGANIZATION_ID },
 		provider: { '@id': ORGANIZATION_ID },
-		inLanguage: 'en-IN',
+		inLanguage: market.lang,
 	};
 }
 
 export interface Faq {
 	question: string;
+	/** May contain inline HTML — it is rendered with set:html on the page. */
 	answer: string;
+}
+
+const ENTITIES: Record<string, string> = {
+	'&amp;': '&',
+	'&lt;': '<',
+	'&gt;': '>',
+	'&quot;': '"',
+	'&#39;': "'",
+	'&nbsp;': ' ',
+	'&rsquo;': '’',
+	'&hellip;': '…',
+};
+
+/**
+ * FAQ answers are authored as HTML so the visible copy can carry emphasis and links, but Google
+ * requires the schema text to match what the user sees. Markup in a JSON-LD `text` field is a
+ * mismatch, so strip it and collapse the whitespace the tags leave behind.
+ */
+function stripTags(html: string): string {
+	return html
+		.replace(/<[^>]*>/g, '')
+		.replace(/&[a-z#0-9]+;/gi, (entity) => ENTITIES[entity.toLowerCase()] ?? entity)
+		.replace(/\s+/g, ' ')
+		.trim();
 }
 
 export function faqPage(faqs: Faq[], path: string): JsonLd {
@@ -95,9 +125,39 @@ export function faqPage(faqs: Faq[], path: string): JsonLd {
 		'@id': `${abs(path)}#faq`,
 		mainEntity: faqs.map((f) => ({
 			'@type': 'Question',
-			name: f.question,
-			acceptedAnswer: { '@type': 'Answer', text: f.answer },
+			name: stripTags(f.question),
+			acceptedAnswer: { '@type': 'Answer', text: stripTags(f.answer) },
 		})),
+	};
+}
+
+export interface ArticleInput {
+	name: string;
+	path: string;
+	description: string;
+	datePublished: string;
+	dateModified?: string;
+	market?: MarketMeta;
+	image?: string;
+}
+
+/** For explainer pages, which are articles rather than applications. */
+export function article(input: ArticleInput): JsonLd {
+	const market = input.market ?? MARKET_NEUTRAL;
+	return {
+		'@type': 'Article',
+		'@id': `${abs(input.path)}#article`,
+		headline: input.name,
+		description: input.description,
+		url: abs(input.path),
+		datePublished: input.datePublished,
+		dateModified: input.dateModified ?? input.datePublished,
+		image: abs(input.image ?? '/og.png'),
+		author: { '@id': ORGANIZATION_ID },
+		publisher: { '@id': ORGANIZATION_ID },
+		mainEntityOfPage: { '@id': `${abs(input.path)}#webpage` },
+		inLanguage: market.lang,
+		isAccessibleForFree: true,
 	};
 }
 
@@ -139,12 +199,14 @@ export function webPage(input: {
 	path: string;
 	description: string;
 	type?: string;
-	/** @id of the node this page is primarily about (the tool, or the list of tools). */
+	/** @id of the node this page is primarily about (the tool, the article, or the list of tools). */
 	mainEntity?: string;
 	/** Link the page to the BreadcrumbList emitted for the same path. */
 	hasBreadcrumb?: boolean;
 	image?: string;
+	market?: MarketMeta;
 }): JsonLd {
+	const market = input.market ?? MARKET_NEUTRAL;
 	return {
 		'@type': input.type ?? 'WebPage',
 		'@id': `${abs(input.path)}#webpage`,
@@ -155,12 +217,15 @@ export function webPage(input: {
 		primaryImageOfPage: { '@type': 'ImageObject', url: abs(input.image ?? '/og.png') },
 		...(input.mainEntity ? { mainEntity: { '@id': input.mainEntity } } : {}),
 		...(input.hasBreadcrumb ? { breadcrumb: { '@id': `${abs(input.path)}#breadcrumb` } } : {}),
-		inLanguage: 'en-IN',
+		inLanguage: market.lang,
 	};
 }
 
 /** @id of the SoftwareApplication node emitted for a tool path. */
 export const appId = (path: string) => `${abs(path)}#app`;
+
+/** @id of the Article node emitted for an explainer path. */
+export const articleId = (path: string) => `${abs(path)}#article`;
 
 /** Wraps one or more schema nodes into a single JSON-LD graph and escapes it for inline <script>. */
 export function toJsonLd(nodes: JsonLd | JsonLd[]): string {

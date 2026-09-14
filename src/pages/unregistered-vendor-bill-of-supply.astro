@@ -65,7 +65,7 @@ const faqs = [
 ];
 
 const schema = [
-	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true }),
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true, market: tool.market }),
 	softwareApplication({
 		name: tool.name,
 		path: tool.href,
@@ -83,6 +83,7 @@ const schema = [
 			'Drafts stored only on your device',
 		],
 		keywords: tool.keywords,
+		market: tool.market,
 	}),
 	faqPage(faqs, tool.href),
 	breadcrumb([
@@ -92,7 +93,7 @@ const schema = [
 ];
 ---
 
-<Layout title={title} description={description} schema={schema}>
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
 	<section class="border-b border-hairline bg-canvas">
 		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
 			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />

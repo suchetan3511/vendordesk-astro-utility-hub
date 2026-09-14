@@ -1,0 +1,54 @@
+---
+/**
+ * On-screen signature pad: draw with a finger, a stylus, a mouse or a trackpad.
+ *
+ * Markup only — `src/scripts/signature-field.ts` finds it by the `data-signature` key and
+ * drops the ink into the matching `data-doc-signature` slot in the rendered document. The
+ * typed field underneath is the keyboard-accessible fallback and is what shows when nothing
+ * has been drawn.
+ */
+interface Props {
+	/** Matches the `data-doc-signature` / `data-doc-sign` slot in the document preview. */
+	slotKey: string;
+	legend: string;
+	/** Field name on the generator's state, e.g. `sign.shipper`. */
+	typedName: string;
+	typedLabel: string;
+	typedPlaceholder?: string;
+}
+
+const { slotKey, legend, typedName, typedLabel, typedPlaceholder } = Astro.props;
+const typedId = `signature-typed-${slotKey}`;
+---
+
+<div class="grid gap-3" data-signature={slotKey}>
+	<p class="text-caption font-semibold text-ink">{legend}</p>
+
+	<div class="relative overflow-hidden rounded-md border border-hairline bg-paper">
+		{/*
+		  `touch-none` is what stops a phone scrolling the page while a finger is drawing;
+		  the pad itself listens on Pointer Events, so pen, touch and mouse share one path.
+		*/}
+		<canvas
+			data-signature-pad
+			class="block h-36 w-full cursor-crosshair touch-none sm:h-40"
+			role="img"
+			aria-label={`${legend}. Draw with touch, stylus or mouse.`}></canvas>
+		<span aria-hidden="true" class="pointer-events-none absolute inset-x-6 bottom-9 border-b border-dashed border-[#d2d2d7]"></span>
+		<span data-signature-placeholder aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-3.5 text-center text-fine text-[#86868b]">
+			Sign above the line
+		</span>
+	</div>
+
+	<div class="flex flex-wrap items-center gap-2">
+		<button type="button" data-signature-undo class="btn btn-ghost btn-sm" disabled>Undo stroke</button>
+		<button type="button" data-signature-clear class="btn btn-ghost btn-sm" disabled>Clear</button>
+		<p class="ml-auto text-fine text-ink-2" data-signature-status role="status" aria-live="polite">Not signed</p>
+	</div>
+
+	<div>
+		<label for={typedId} class="field-label">{typedLabel}</label>
+		<input id={typedId} name={typedName} type="text" class="field" placeholder={typedPlaceholder} autocomplete="name" />
+		<p class="field-hint">Used when nothing is drawn — handy on a keyboard, or if drawing is awkward.</p>
+	</div>
+</div>

@@ -1,0 +1,638 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import SignaturePad from '../components/SignaturePad.astro';
+import { BOL, DIM_WEIGHT, FREIGHT_CLASS, NMFC_LOOKUP, SITE, WHAT_IS_CLASS } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { FREIGHT_CLASSES, FREIGHT_TERMS, PACKAGE_TYPES, US_STATES } from '../lib/usa';
+import '../styles/document.css';
+
+const tool = BOL;
+const title = 'Bill of Lading Generator — Free BOL Template';
+const description =
+	'Create a straight bill of lading free and download the PDF. Freight class and NMFC columns, prepaid or collect terms, COD and declared value.';
+
+const faqs = [
+	{
+		question: 'What is a bill of lading?',
+		answer:
+			'A bill of lading, or BOL, is the contract between you and the carrier moving your freight. It does three jobs at once: it is a receipt for the goods handed over, a document of title, and the contract of carriage that sets the terms the shipment moves under. No LTL carrier will collect freight without one.',
+	},
+	{
+		question: 'What is a straight bill of lading?',
+		answer:
+			'A straight bill of lading is non-negotiable: the freight is consigned to one named party and only that party can take delivery. It is the standard form for ordinary domestic LTL and truckload shipments. An order bill of lading, by contrast, is negotiable and can transfer title while the goods are in transit.',
+	},
+	{
+		question: 'Do I need the freight class on the bill of lading?',
+		answer:
+			'You should always put it there. If you leave the class blank the carrier assigns one, and an inspection-driven reclassification almost always costs more than getting it right up front. Work the class out with the freight class calculator and copy it onto the line.',
+	},
+	{
+		question: 'What do prepaid, collect and third party mean?',
+		answer:
+			'They say who pays the carrier. Prepaid means the shipper pays, and is the norm for shipments going out to a customer. Collect means the consignee pays on delivery, which is common when a buyer routes freight on their own carrier account. Third party means somebody else pays, and that party has to be named on the document.',
+	},
+	{
+		question: 'What is a declared value and should I use one?',
+		answer:
+			'Carrier liability is limited by the released value in the applicable tariff, which is often far below what the goods are worth. Declaring a higher value raises the carrier’s liability and the rate with it. If your freight is worth materially more than the tariff limit, declare it — and expect to pay for the cover.',
+	},
+	{
+		question: 'Can I sign the bill of lading online?',
+		answer:
+			'Yes. There is a signature pad for the shipper and one for the carrier, and either can be signed with a finger on a touchscreen, a stylus, or a mouse or trackpad. The ink is drawn straight onto the document and goes into the PDF with it. Nothing is uploaded — the signature is produced in your browser, the same as the rest of the document. If you would rather sign the printed copy by hand, leave the pads blank and the ruled lines print empty.',
+	},
+	{
+		question: 'Is this bill of lading legally valid?',
+		answer:
+			'The document produced here follows the standard straight bill of lading format and carries the usual terms and shipper certification. It is a template, not legal advice, and carriers can require their own form or their own tariff terms. Check with your carrier before relying on it for a first shipment.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true, market: tool.market }),
+	softwareApplication({
+		name: tool.name,
+		path: tool.href,
+		description,
+		category: 'BusinessApplication',
+		features: tool.features,
+		keywords: tool.keywords,
+		market: tool.market,
+	}),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+
+/** Shipper / consignee / third-party blocks are identical, so the markup is generated. */
+const parties = [
+	{ key: 'shipper', legend: '1. Ship from (shipper)', org: 'organization', hint: 'The address the carrier collects from.' },
+	{ key: 'consignee', legend: '2. Ship to (consignee)', org: 'organization', hint: 'The address the carrier delivers to.' },
+] as const;
+---
+
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">LTL shipping · Free · No sign-up</p>
+				<h1 class="mt-3 text-display text-ink">Bill of Lading Generator</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Fill in the shipper, the consignee and what is on the pallet, and get a straight bill of lading you can hand to the
+					driver. Freight class and NMFC item sit on every line, where the carrier expects to find them. Nothing is uploaded —
+					the PDF is built on your device.
+				</p>
+			</div>
+			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Highlights">
+				<li class="chip">Free · no sign-up</li>
+				<li class="chip">Freight class column</li>
+				<li class="chip">Prepaid · collect · third party</li>
+				<li class="chip">COD &amp; declared value</li>
+				<li class="chip">Sign on screen</li>
+				<li class="chip">PDF or print</li>
+			</ul>
+			<p class="mt-6 text-fine text-ink-3">
+				Figures are indicative. Confirm classification with your carrier before booking.
+			</p>
+		</div>
+	</section>
+
+	<!-- Tool -->
+	<section id="tool" class="bg-parchment" aria-labelledby="tool-heading">
+		<h2 id="tool-heading" class="sr-only">Bill of lading generator</h2>
+		<div
+			class="mx-auto grid max-w-page gap-6 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:items-start"
+			data-bol-tool
+			data-doc-tool
+		>
+			<!-- Form -->
+			<form class="card grid gap-8 p-5 sm:p-6" data-bol-form novalidate autocomplete="on">
+				{
+					parties.map((party) => (
+						<fieldset class:list={['grid gap-4', party.key === 'consignee' && 'border-t border-hairline pt-6']}>
+							<legend class="float-left text-[1.0625rem] font-semibold text-ink">{party.legend}</legend>
+							<div class="clear-both">
+								<label for={`${party.key}-name`} class="field-label">
+									Company name
+								</label>
+								<input id={`${party.key}-name`} name={`${party.key}.name`} type="text" class="field" placeholder="e.g. Ridgeline Supply Co." autocomplete={party.org} />
+							</div>
+							<div>
+								<label for={`${party.key}-address`} class="field-label">
+									Street address
+								</label>
+								<textarea id={`${party.key}-address`} name={`${party.key}.address`} rows="2" class="field" placeholder="1420 W Industrial Blvd, Dock 4" autocomplete="street-address" />
+							</div>
+							<div class="grid gap-4 sm:grid-cols-[1.4fr_0.8fr_1fr]">
+								<div>
+									<label for={`${party.key}-city`} class="field-label">
+										City
+									</label>
+									<input id={`${party.key}-city`} name={`${party.key}.city`} type="text" class="field" autocomplete="address-level2" />
+								</div>
+								<div>
+									<label for={`${party.key}-state`} class="field-label">
+										State
+									</label>
+									<select id={`${party.key}-state`} name={`${party.key}.state`} class="field">
+										<option value="">—</option>
+										{US_STATES.map((s) => (
+											<option value={s.code}>{s.code}</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label for={`${party.key}-zip`} class="field-label">
+										ZIP
+									</label>
+									<input id={`${party.key}-zip`} name={`${party.key}.zip`} type="text" class="field tnum" maxlength="10" placeholder="75201" autocomplete="postal-code" />
+								</div>
+							</div>
+							<div class="grid gap-4 sm:grid-cols-2">
+								<div>
+									<label for={`${party.key}-contact`} class="field-label">
+										Contact <span class="font-normal text-ink-3">(optional)</span>
+									</label>
+									<input id={`${party.key}-contact`} name={`${party.key}.contact`} type="text" class="field" autocomplete="name" />
+								</div>
+								<div>
+									<label for={`${party.key}-phone`} class="field-label">
+										Phone <span class="font-normal text-ink-3">(optional)</span>
+									</label>
+									<input id={`${party.key}-phone`} name={`${party.key}.phone`} type="tel" class="field" autocomplete="tel" />
+								</div>
+							</div>
+							<p class="field-hint">{party.hint}</p>
+						</fieldset>
+					))
+				}
+
+				<!-- Shipment details -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">3. Shipment details</legend>
+					<div class="clear-both grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="bol-number" class="field-label">BOL number</label>
+							<input id="bol-number" name="bol.number" type="text" class="field tnum" spellcheck="false" autocomplete="off" />
+						</div>
+						<div>
+							<label for="bol-date" class="field-label">Ship date</label>
+							<input id="bol-date" name="bol.date" type="date" class="field tnum" />
+						</div>
+						<div>
+							<label for="bol-carrier" class="field-label">Carrier</label>
+							<input id="bol-carrier" name="carrier.name" type="text" class="field" placeholder="e.g. Old Dominion" />
+						</div>
+						<div>
+							<label for="bol-scac" class="field-label">SCAC <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="bol-scac" name="carrier.scac" type="text" class="field font-mono uppercase" maxlength="4" placeholder="ODFL" spellcheck="false" />
+						</div>
+						<div>
+							<label for="bol-po" class="field-label">PO number <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="bol-po" name="bol.po" type="text" class="field tnum" spellcheck="false" />
+						</div>
+						<div>
+							<label for="bol-pro" class="field-label">PRO number <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="bol-pro" name="bol.pro" type="text" class="field tnum" spellcheck="false" />
+						</div>
+						<div>
+							<label for="bol-trailer" class="field-label">Trailer <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="bol-trailer" name="bol.trailer" type="text" class="field tnum" spellcheck="false" />
+						</div>
+						<div>
+							<label for="bol-seal" class="field-label">Seal <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="bol-seal" name="bol.seal" type="text" class="field tnum" spellcheck="false" />
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Freight terms -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">4. Freight charge terms</legend>
+					<div class="clear-both grid gap-2 sm:grid-cols-3">
+						{
+							FREIGHT_TERMS.map((term, i) => (
+								<button type="button" data-term={term.id} class="option-card" aria-pressed={i === 0 ? 'true' : 'false'}>
+									<span class="text-caption font-semibold text-ink">{term.label}</span>
+								</button>
+							))
+						}
+					</div>
+					<p class="field-hint" data-terms-note>{FREIGHT_TERMS[0].note}</p>
+
+					<div class="grid gap-4 rounded-md border border-hairline bg-parchment p-4" data-third-party hidden>
+						<p class="text-caption font-semibold text-ink">Third party paying the freight</p>
+						<div>
+							<label for="tp-name" class="field-label">Company name</label>
+							<input id="tp-name" name="thirdParty.name" type="text" class="field" />
+						</div>
+						<div class="grid gap-4 sm:grid-cols-[1.4fr_0.8fr_1fr]">
+							<div>
+								<label for="tp-city" class="field-label">City</label>
+								<input id="tp-city" name="thirdParty.city" type="text" class="field" />
+							</div>
+							<div>
+								<label for="tp-state" class="field-label">State</label>
+								<select id="tp-state" name="thirdParty.state" class="field">
+									<option value="">—</option>
+									{US_STATES.map((s) => <option value={s.code}>{s.code}</option>)}
+								</select>
+							</div>
+							<div>
+								<label for="tp-zip" class="field-label">ZIP</label>
+								<input id="tp-zip" name="thirdParty.zip" type="text" class="field tnum" maxlength="10" />
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Commodities -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">5. Commodities</legend>
+					<div class="clear-both grid gap-3" data-items></div>
+					<button type="button" data-add-item class="btn btn-ghost btn-sm justify-self-start">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+						Add line
+					</button>
+					<p class="field-hint">
+						Not sure of the class? <a href={FREIGHT_CLASS.href} class="link">Work it out from dimensions and weight</a> and come back.
+					</p>
+				</fieldset>
+
+				<!-- Extras -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">6. Special instructions &amp; charges</legend>
+					<div class="clear-both">
+						<label for="bol-special" class="field-label">Special instructions <span class="font-normal text-ink-3">(optional)</span></label>
+						<textarea id="bol-special" name="special" rows="2" class="field" placeholder="Liftgate required at delivery. Call 30 minutes ahead."></textarea>
+					</div>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div class="grid gap-2">
+							<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
+								<input name="cod.enabled" type="checkbox" class="checkbox" />
+								Collect on delivery (COD)
+							</label>
+							<div>
+								<label for="cod-amount" class="field-label">COD amount</label>
+								<input id="cod-amount" name="cod.amount" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
+							</div>
+						</div>
+						<div class="grid gap-2">
+							<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
+								<input name="declared.enabled" type="checkbox" class="checkbox" />
+								Declare a value
+							</label>
+							<div>
+								<label for="declared-amount" class="field-label">Declared value</label>
+								<input id="declared-amount" name="declared.amount" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Signatures -->
+				<fieldset class="grid gap-5 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">7. Signatures</legend>
+					<p class="clear-both text-caption text-ink-2">
+						Sign with a finger on a touchscreen, a stylus, or a mouse or trackpad. The ink is drawn straight onto the
+						document and never leaves this device. Leave a pad blank if you would rather sign the printed copy by hand.
+					</p>
+					<div class="grid gap-6 sm:grid-cols-2">
+						<SignaturePad
+							slotKey="shipper"
+							legend="Shipper signature"
+							typedName="sign.shipper"
+							typedLabel="Or type the shipper's name"
+							typedPlaceholder="e.g. Dana Whitfield"
+						/>
+						<SignaturePad
+							slotKey="carrier"
+							legend="Carrier signature"
+							typedName="sign.carrier"
+							typedLabel="Or type the driver's name"
+							typedPlaceholder="e.g. R. Alvarez"
+						/>
+					</div>
+					<div class="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
+						<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
+							<input name="keepDraft" type="checkbox" class="checkbox" checked />
+							Keep a draft in this browser
+						</label>
+						<button type="button" data-reset class="btn-quiet">Start over</button>
+					</div>
+				</fieldset>
+			</form>
+
+			<!-- Preview -->
+			<div class="grid gap-4 lg:sticky lg:top-20">
+				<div class="card overflow-hidden">
+					<div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 sm:px-5">
+						<h3 class="text-[1.0625rem] font-semibold">Document preview</h3>
+						<p class="tnum text-caption text-ink-2">
+							<span data-doc="summary.pieces">0</span> pcs · <span data-doc="summary.weight">0 lb</span> · Class
+							<span class="font-semibold text-ink" data-doc="summary.class">—</span>
+						</p>
+					</div>
+					<div id="doc-viewport" class="overflow-hidden bg-parchment p-3 sm:p-6">
+						<div id="doc-scaler" class="origin-top-left">
+							<!-- Letter-size document. Hex colours only: html2canvas cannot parse modern colour functions. -->
+							<div id="bol-document" class="vd-doc">
+								<header class="vd-head vd-block">
+									<div>
+										<!-- Not a heading element: this is the rendered document's own title. -->
+										<p class="vd-title">Straight Bill of Lading</p>
+										<p class="vd-subtitle">Short form &mdash; original &mdash; not negotiable</p>
+									</div>
+									<table class="vd-meta">
+										<tbody>
+											<tr><th>BOL No.</th><td data-doc="bol.number"></td></tr>
+											<tr><th>Ship date</th><td data-doc="bol.date"></td></tr>
+											<tr><th>PO No.</th><td data-doc="bol.po"></td></tr>
+											<tr><th>PRO No.</th><td data-doc="bol.pro"></td></tr>
+										</tbody>
+									</table>
+								</header>
+
+								<section class="vd-parties vd-parties-2 vd-block">
+									<div class="vd-party">
+										<h4>Ship from</h4>
+										<p class="vd-name" data-doc="shipper.name"></p>
+										<p class="vd-pre" data-doc="shipper.address"></p>
+										<p data-doc="shipper.cityLine"></p>
+										<p data-doc="shipper.contact"></p>
+									</div>
+									<div class="vd-party">
+										<h4>Ship to</h4>
+										<p class="vd-name" data-doc="consignee.name"></p>
+										<p class="vd-pre" data-doc="consignee.address"></p>
+										<p data-doc="consignee.cityLine"></p>
+										<p data-doc="consignee.contact"></p>
+									</div>
+								</section>
+
+								<section class="vd-strip vd-strip-4 vd-block">
+									<div class="vd-field"><h4>Carrier</h4><p data-doc="carrier.name"></p></div>
+									<div class="vd-field"><h4>SCAC</h4><p data-doc="carrier.scac"></p></div>
+									<div class="vd-field"><h4>Trailer</h4><p data-doc="bol.trailer"></p></div>
+									<div class="vd-field"><h4>Seal</h4><p data-doc="bol.seal"></p></div>
+								</section>
+
+								<section class="vd-strip vd-strip-3 vd-block">
+									<div class="vd-field"><h4>Freight charge terms</h4><p data-doc="terms"></p></div>
+									<div class="vd-field" data-doc-row="cod" hidden><h4>COD amount</h4><p data-doc="cod.amount"></p></div>
+									<div class="vd-field" data-doc-row="declared" hidden><h4>Declared value</h4><p data-doc="declared.amount"></p></div>
+									<div class="vd-field" data-doc-row="thirdParty" hidden><h4>Bill freight to</h4><p data-doc="thirdParty.name"></p><p data-doc="thirdParty.cityLine"></p></div>
+								</section>
+
+								<table class="vd-items">
+									<caption>Commodity description</caption>
+									<thead>
+										<tr>
+											<th scope="col" class="vd-num">Qty</th>
+											<th scope="col">Type</th>
+											<th scope="col" class="vd-mid">HM</th>
+											<th scope="col" class="vd-num">Weight</th>
+											<th scope="col" class="vd-desc">Description of articles, special marks and exceptions</th>
+											<th scope="col" class="vd-mid">NMFC</th>
+											<th scope="col" class="vd-mid">Class</th>
+										</tr>
+									</thead>
+									<tbody data-doc-items></tbody>
+									<tfoot>
+										<tr>
+											<td class="vd-num" data-doc="totals.pieces">0</td>
+											<td colspan="2">Total pieces</td>
+											<td class="vd-num" data-doc="totals.weight">0 lb</td>
+											<td colspan="3">Total weight</td>
+										</tr>
+									</tfoot>
+								</table>
+
+								<section class="vd-section vd-block" data-doc-row="special" hidden>
+									<h4>Special instructions</h4>
+									<p data-doc="special"></p>
+								</section>
+
+								<section class="vd-section vd-block" data-doc-row="hazmat" hidden>
+									<h4>Shipper certification &mdash; hazardous materials</h4>
+									<p>
+										This is to certify that the above named materials are properly classified, described, packaged, marked and
+										labeled, and are in proper condition for transportation according to the applicable regulations of the
+										Department of Transportation.
+									</p>
+								</section>
+
+								<div class="vd-spacer"></div>
+
+								<section class="vd-legal vd-block">
+									<h4>Terms</h4>
+									<p>
+										RECEIVED, subject to individually determined rates or contracts that have been agreed upon in writing between
+										the carrier and shipper, if applicable, otherwise to the rates, classifications and rules that have been
+										established by the carrier and are available to the shipper on request, and to all applicable state and
+										federal regulations.
+									</p>
+									<p>
+										The carrier shall not make delivery of this shipment without payment of freight and all other lawful charges.
+										Where the rate is dependent on value, shippers are required to state specifically in writing the agreed or
+										declared value of the property. The property described above is received in apparent good order except as noted.
+									</p>
+								</section>
+
+								<section class="vd-signs vd-signs-2 vd-block">
+									<div class="vd-sign">
+										<div class="vd-sign-line">
+											<img data-doc-signature="shipper" alt="Shipper signature" hidden />
+											<span class="vd-sign-typed" data-doc-sign="shipper" hidden></span>
+										</div>
+										<h4>Shipper signature</h4>
+										<p>Date</p>
+									</div>
+									<div class="vd-sign">
+										<div class="vd-sign-line">
+											<img data-doc-signature="carrier" alt="Carrier signature" hidden />
+											<span class="vd-sign-typed" data-doc-sign="carrier" hidden></span>
+										</div>
+										<h4>Carrier signature &amp; pickup date</h4>
+										<p>Carrier acknowledges receipt of packages and required placards.</p>
+									</div>
+								</section>
+								<p class="vd-fine">Generated with {SITE.domain}. This is a template, not legal advice — your carrier may require its own form.</p>
+							</div>
+						</div>
+					</div>
+					<div class="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-3 sm:px-5">
+						<button type="button" data-download-pdf class="btn btn-primary btn-sm">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"></path></svg>
+							Download PDF
+						</button>
+						<button type="button" data-print class="btn btn-ghost btn-sm">Print</button>
+						<p data-live class="ml-auto text-fine text-ink-2" role="status" aria-live="polite"></p>
+					</div>
+				</div>
+
+				<div class="card p-5 sm:p-6">
+					<p class="eyebrow">Readiness check</p>
+					<div
+						id="bol-readiness"
+						class="mt-3 grid gap-2 text-caption [&>p]:rounded-md [&>p]:border [&>p]:px-3.5 [&>p]:py-2.5 [&>p[data-kind=ok]]:border-success/40 [&>p[data-kind=ok]]:text-success [&>p[data-kind=missing]]:border-hairline [&>p[data-kind=missing]]:text-ink-2 [&>p[data-kind=warn]]:border-danger/40 [&>p[data-kind=warn]]:text-danger"
+						aria-live="polite"
+					>
+					</div>
+				</div>
+			</div>
+
+			<!-- Mobile action bar (inside the tool root so the script can bind it) -->
+			<div
+				class="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-parchment/90 px-5 py-3 backdrop-blur-xl lg:hidden"
+				style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))"
+			>
+				<div class="mx-auto flex max-w-page items-center justify-between gap-4">
+					<p class="tnum text-caption text-ink-2">
+						<span class="font-semibold text-ink" data-doc="summary.weight">0 lb</span> · Class <span data-doc="summary.class">—</span>
+					</p>
+					<button type="button" data-download-pdf class="btn btn-primary btn-sm">Download PDF</button>
+				</div>
+			</div>
+
+			<!-- Commodity row template -->
+			<template id="bol-row-template">
+				<div data-item-row class="grid gap-2 rounded-md border border-hairline bg-parchment p-3">
+					<div class="flex items-center justify-between">
+						<span class="text-fine font-semibold text-ink-2">Line <span data-item-index>1</span></span>
+						<button
+							type="button"
+							data-remove-item
+							class="press -my-1 inline-flex min-h-9 items-center gap-1 rounded-full px-2.5 text-fine text-ink-2 hover:text-danger disabled:opacity-40"
+							aria-label="Remove line"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+							Remove
+						</button>
+					</div>
+					<div>
+						<label data-for="description" class="sr-only">Description of articles</label>
+						<input data-item-field="description" type="text" class="field" placeholder="Description of articles" />
+					</div>
+					<div class="grid grid-cols-2 gap-2 sm:grid-cols-[0.7fr_1fr_1fr]">
+						<div>
+							<label data-for="qty" class="text-fine text-ink-2">Qty</label>
+							<input data-item-field="qty" type="number" inputmode="numeric" min="0" step="1" class="field tnum mt-1" />
+						</div>
+						<div>
+							<label data-for="packageType" class="text-fine text-ink-2">Type</label>
+							<select data-item-field="packageType" class="field mt-1">
+								{PACKAGE_TYPES.map((p) => <option value={p}>{p}</option>)}
+							</select>
+						</div>
+						<div>
+							<label data-for="weight" class="text-fine text-ink-2">Weight (lb)</label>
+							<input data-item-field="weight" type="number" inputmode="decimal" min="0" step="any" class="field tnum mt-1" />
+						</div>
+					</div>
+					<div class="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+						<div>
+							<label data-for="nmfc" class="text-fine text-ink-2">NMFC item</label>
+							<input data-item-field="nmfc" type="text" class="field tnum mt-1" placeholder="Optional" spellcheck="false" />
+						</div>
+						<div>
+							<label data-for="freightClass" class="text-fine text-ink-2">Class</label>
+							<select data-item-field="freightClass" class="field mt-1">
+								<option value="">—</option>
+								{FREIGHT_CLASSES.map((c) => <option value={c}>{c}</option>)}
+							</select>
+						</div>
+						<label class="flex min-h-11 items-center gap-2 self-end text-fine text-ink">
+							<input data-item-field="hazmat" type="checkbox" class="checkbox" />
+							Hazmat
+						</label>
+					</div>
+				</div>
+			</template>
+		</div>
+	</section>
+
+	<!-- Editorial -->
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<h2>What goes on a bill of lading</h2>
+				<p>
+					A bill of lading is the document the driver signs when they take your freight, and the one a claims adjuster reads if
+					anything goes wrong. It names the shipper and the consignee, describes what is being moved, states who pays, and
+					records the condition the goods were in when the carrier accepted them.
+				</p>
+				<p>
+					Four things account for almost every corrected invoice and denied claim. The <strong>freight class</strong>, because a
+					carrier that has to classify your freight for you will inspect it and rate it their way. The
+					<strong>weight</strong>, because carriers reweigh and bill the difference. The <strong>freight charge terms</strong>,
+					because a shipment marked prepaid when it should have been collect ends up on the wrong account. And the
+					<strong>declared value</strong>, because carrier liability is capped by tariff at a figure that is often a fraction of
+					what the goods are worth.
+				</p>
+
+				<h2>Get the class right before the driver arrives</h2>
+				<p>
+					Freight class is the field people guess at, and guessing is expensive. The class comes from density for most
+					commodities: measure the outside of the packaging including the pallet, work out pounds per cubic foot, and read the
+					class off the NMFC density scale — which the NMFTA restructured in July 2025, so older charts disagree with it below
+					15 pounds per cubic foot.
+				</p>
+				<p>
+					The <a href={FREIGHT_CLASS.href}>freight class calculator</a> does that arithmetic and hands the result straight to
+					this generator, so the class on the document is the class you calculated. If your goods carry a fixed NMFC listing
+					rather than rating on density, check the <a href={NMFC_LOOKUP.href}>NMFC code lookup</a> first. If none of this is
+					familiar yet, <a href={WHAT_IS_CLASS.href}>what freight class is</a> covers the background in plain English.
+				</p>
+
+				<h2>Bills of lading are for freight, not parcels</h2>
+				<p>
+					If your shipment moves on a pallet with an LTL carrier, it needs a bill of lading. If it goes in a box through UPS,
+					FedEx or USPS, it does not — the label and tracking number do that job, and what you care about instead is billable
+					weight. The <a href={DIM_WEIGHT.href}>dimensional weight calculator</a> covers that side.
+				</p>
+				<p class="callout">
+					Figures are indicative. Confirm classification with your carrier before booking. Carriers may require their own bill of
+					lading form or their own tariff terms, and this document is a template rather than legal advice.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Bill of lading questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="bol-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Work out the class first.</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Enter dimensions and weight, get the NMFC class, then carry it straight onto the bill of lading.
+				</p>
+			</div>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the freight class calculator</a>
+		</div>
+	</section>
+</Layout>
+
+<script>
+	import { initBillOfLadingTool } from '../scripts/bill-of-lading';
+	const root = document.querySelector<HTMLElement>('[data-bol-tool]');
+	if (root) initBillOfLadingTool(root);
+</script>

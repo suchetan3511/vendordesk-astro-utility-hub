@@ -1,0 +1,241 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { FREIGHT_CHART, FREIGHT_CLASS, NMFC_LOOKUP, WHAT_IS_CLASS } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { NMFC_COMMODITIES } from '../lib/nmfc-data';
+
+const tool = NMFC_LOOKUP;
+const title = 'NMFC Code Lookup — Free Commodity Class Search';
+const description =
+	'Search common LTL commodities to see whether each rates on density or carries a fixed class. Free lookup, no sign-up, filters as you type.';
+
+const densityCount = NMFC_COMMODITIES.filter((c) => c.basis === 'density').length;
+
+const faqs = [
+	{
+		question: 'Can I look up any NMFC code for free?',
+		answer:
+			'Not comprehensively. The National Motor Freight Classification is a proprietary publication licensed from the NMFTA, and the full set of item numbers is not free to republish. This page is a reference for common commodities and how they classify — it is not a substitute for the official publication or for your carrier’s own rating.',
+	},
+	{
+		question: 'Why does this tool not show NMFC item numbers?',
+		answer:
+			'Because publishing numbers we cannot stand behind would be worse than publishing none. Docket 2025-1 consolidated roughly 2,000 commodity listings in July 2025, so item numbers circulating free on the web are frequently out of date. What this page can tell you accurately is whether a commodity rates on density or carries a fixed class, and the class it typically lands at.',
+	},
+	{
+		question: 'What does density-based mean?',
+		answer:
+			'It means the class is determined by the shipment’s density in pounds per cubic foot rather than fixed by the commodity listing. The same product can rate at different classes depending on how it is packed. Use the freight class calculator to work out the density and the resulting class.',
+	},
+	{
+		question: 'Where do I find my exact NMFC item number?',
+		answer:
+			'Ask your carrier or freight broker — they rate against the current publication daily and will confirm both the item number and the class. Shippers who classify frequently can license ClassIT directly from the NMFTA.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true, market: tool.market }),
+	softwareApplication({
+		name: tool.name,
+		path: tool.href,
+		description,
+		category: 'BusinessApplication',
+		features: tool.features,
+		keywords: tool.keywords,
+		market: tool.market,
+	}),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">LTL reference · Free · No sign-up</p>
+				<h1 class="mt-3 text-display text-ink">NMFC Code Lookup</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Search {NMFC_COMMODITIES.length} common LTL commodities to see whether each one rates on density or carries a fixed
+					class, and the class it typically lands at. Filters as you type, entirely in your browser.
+				</p>
+			</div>
+			<p class="mt-6 text-fine text-ink-3">
+				Figures are indicative. Confirm classification with your carrier before booking.
+			</p>
+		</div>
+	</section>
+
+	<!-- Honesty note: prominent by design. -->
+	<section class="border-b border-hairline bg-parchment">
+		<div class="mx-auto max-w-page px-5 py-6 sm:px-8">
+			<div class="card max-w-prose p-5">
+				<p class="text-caption text-ink-2">
+					<strong class="font-semibold text-ink">This is a free reference, not the NMFC.</strong> The National Motor Freight
+					Classification is a proprietary publication licensed from the NMFTA. This page covers common commodities and how they
+					classify; it does not reproduce the publication and it is not a substitute for it. For a binding classification, confirm
+					the item number and class with your carrier.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Tool -->
+	<section id="tool" class="bg-canvas" aria-labelledby="tool-heading">
+		<h2 id="tool-heading" class="sr-only">Commodity classification search</h2>
+		<div class="mx-auto max-w-page px-5 py-8 sm:px-8 sm:py-12" data-nmfc-tool>
+			<div class="card p-5 sm:p-6">
+				<div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+					<div>
+						<label for="nmfc-search" class="field-label">Search by commodity or category</label>
+						<input
+							id="nmfc-search"
+							name="nmfc-search"
+							type="search"
+							class="field"
+							placeholder="mattress, steel, furniture…"
+							autocomplete="off"
+						/>
+					</div>
+					<div>
+						<label for="nmfc-basis" class="field-label">Rated by</label>
+						<select id="nmfc-basis" name="nmfc-basis" class="field">
+							<option value="all">All commodities</option>
+							<option value="density">Density-based</option>
+							<option value="fixed">Fixed class</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="mt-4 flex flex-wrap items-center gap-3">
+					<p class="text-fine text-ink-2" data-count role="status" aria-live="polite">{NMFC_COMMODITIES.length} commodities</p>
+					<button type="button" class="btn-quiet" data-clear hidden>Clear filters</button>
+				</div>
+
+				<div class="mt-5 overflow-x-auto">
+					<table class="w-full border-collapse text-caption">
+						<caption class="sr-only">Common LTL commodities with their classification basis and typical freight class</caption>
+						<thead>
+							<tr class="border-b border-hairline-strong">
+								<th scope="col" class="py-2.5 pr-4 text-left font-semibold text-ink-2">Commodity</th>
+								<th scope="col" class="py-2.5 pr-4 text-left font-semibold whitespace-nowrap text-ink-2">Rated by</th>
+								<th scope="col" class="py-2.5 pr-4 text-left font-semibold whitespace-nowrap text-ink-2">Typical class</th>
+								<th scope="col" class="py-2.5 text-left font-semibold text-ink-2">Category</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								NMFC_COMMODITIES.map((row) => (
+									<tr
+										class="border-b border-hairline last:border-b-0"
+										data-commodity={row.commodity}
+										data-category={row.category}
+										data-basis={row.basis}
+									>
+										<th scope="row" class="py-2.5 pr-4 text-left font-medium text-ink">{row.commodity}</th>
+										<td class="py-2.5 pr-4 whitespace-nowrap text-ink-2">{row.basis === 'density' ? 'Density' : 'Fixed class'}</td>
+										<td class="tnum py-2.5 pr-4 font-semibold whitespace-nowrap text-ink">{row.typicalClass}</td>
+										<td class="py-2.5 text-ink-2">{row.category}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<p class="mt-5 text-caption text-ink-2" data-no-results hidden>
+					No commodities match that search. Try a broader term, or a category such as “furniture” or
+					“metals”.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Editorial -->
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<p class="eyebrow">How to use this</p>
+				<h2 class="mt-3!">Density-based or fixed class?</h2>
+				<p class="lede">
+					That distinction is the useful thing to know before you rate a shipment. {densityCount} of the
+					{NMFC_COMMODITIES.length} commodities listed above rate on density, which means the class depends on how your particular
+					shipment is packed rather than on what it is.
+				</p>
+				<p>
+					For those, work out the density and read the class off the scale — the
+					<a href={FREIGHT_CLASS.href}>freight class calculator</a> does both in one step. Pack the same goods more tightly and the
+					density rises, the class falls, and the shipment gets cheaper. That is the lever you actually control.
+				</p>
+				<p>
+					For commodities with a fixed listing, the class is what the NMFC says it is, whatever the density works out to. Batteries,
+					hazardous materials, pharmaceuticals and nursery stock are typical examples: stowability, handling and liability
+					characteristics rather than density decide where they sit.
+				</p>
+
+				<h2>Why there are no item numbers here</h2>
+				<p>
+					The NMFC assigns each commodity an item number as well as a class, and carriers generally want both on the bill of
+					lading. We do not publish item numbers on this page for a straightforward reason: Docket 2025-1 consolidated roughly
+					2,000 listings in July 2025, and a great many item numbers published free on the web predate that. A stale item number
+					looks authoritative and gets copied onto paperwork, which is worse than no number at all.
+				</p>
+				<p>
+					Your carrier or broker rates against the current publication every day and will confirm the item number in a phone call.
+					If you classify frequently enough for that to be a burden, the NMFTA licenses ClassIT directly.
+				</p>
+
+				<h2>Before you rate a shipment</h2>
+				<p>
+					Use this page to orient yourself, then confirm. Check the
+					<a href={FREIGHT_CHART.href}>full freight class chart</a> for the density bands, read
+					<a href={WHAT_IS_CLASS.href}>how freight class is determined</a> if the four factors are new to you, and put the class
+					and item number on the bill of lading together — supplying both is the single most effective way to avoid a
+					reclassification.
+				</p>
+				<p class="callout">
+					Typical classes shown here are indicative and assume no unusual stowability, handling or liability characteristics.
+					Confirm classification with your carrier before booking.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Lookup questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="nmfc-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Density-based commodity? Get the number.</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Enter your dimensions and weight and the calculator returns the density, the cubic footage and the class.
+				</p>
+			</div>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the freight class calculator</a>
+		</div>
+	</section>
+</Layout>
+
+<script>
+	import { initNmfcLookup } from '../scripts/nmfc-lookup';
+	const root = document.querySelector<HTMLElement>('[data-nmfc-tool]');
+	if (root) initNmfcLookup(root);
+</script>

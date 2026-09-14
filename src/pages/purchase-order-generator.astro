@@ -1,0 +1,586 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import SignaturePad from '../components/SignaturePad.astro';
+import { BOL, FREIGHT_CLASS, PURCHASE_ORDER, SITE } from '../lib/site';
+import { appId, breadcrumb, faqPage, softwareApplication, webPage } from '../lib/schema';
+import { FOB_TERMS, ITEM_UNITS, PAYMENT_TERMS, SHIP_METHODS, US_STATES } from '../lib/usa';
+import '../styles/document.css';
+
+const tool = PURCHASE_ORDER;
+const title = 'Purchase Order Generator — Free PO Template';
+const description =
+	'Create a purchase order free and download the PDF. Line items, tax, shipping, payment and FOB terms, and a running total as you type.';
+
+const faqs = [
+	{
+		question: 'What is a purchase order?',
+		answer:
+			'A purchase order is the document a buyer issues to a vendor to order goods or services at an agreed price. Once the vendor accepts it, it becomes a binding contract covering what was ordered, what it costs, when it is needed and on what terms. It is also what the vendor’s invoice gets matched against before anyone pays it.',
+	},
+	{
+		question: 'What is the difference between a purchase order and an invoice?',
+		answer:
+			'The buyer issues the purchase order before the goods ship; the vendor issues the invoice afterwards to ask for payment. The PO says what you agreed to buy, the invoice says what you owe. Accounts payable teams match the two, along with the receiving record, before releasing funds.',
+	},
+	{
+		question: 'What does FOB mean on a purchase order?',
+		answer:
+			'FOB marks the point where title and risk pass from vendor to buyer. FOB Destination means the vendor owns the goods until they arrive, so a shipment damaged in transit is the vendor’s problem. FOB Origin means you own them from the moment the carrier collects, and the loss is yours. It is a small field with large consequences.',
+	},
+	{
+		question: 'What are Net 30 payment terms?',
+		answer:
+			'Net 30 means the full amount is due 30 days after the invoice date. Variants shorten or lengthen that window — Net 15, Net 45, Net 60. A term written as 2/10 Net 30 adds an early payment discount: take 2% off if you pay within 10 days, otherwise the full amount is due at 30.',
+	},
+	{
+		question: 'Does this calculate sales tax correctly?',
+		answer:
+			'It applies the tax rate you enter to the subtotal after any discount, then adds shipping on top. That is the ordinary treatment, but sales tax varies by state and by what you are buying, and a number of states tax freight as well. Enter the rate your accountant or tax software gives you rather than assuming a default.',
+	},
+	{
+		question: 'Can I sign the purchase order online?',
+		answer:
+			'Yes. The authorisation section has a signature pad you can sign with a finger on a touchscreen, a stylus, or a mouse or trackpad. The ink is drawn straight onto the purchase order and goes into the PDF with it. Nothing is uploaded — the signature is produced in your browser. You can type the authorising name instead if that is easier, and leaving both blank prints an empty signature line to sign by hand.',
+	},
+	{
+		question: 'Do I need a PO number?',
+		answer:
+			'Yes, in practice. The PO number is what ties your order to the vendor’s invoice, the receiving record and the eventual payment. Most vendors will ask for it, and many accounts payable systems will not process an invoice that lacks one. The generator suggests a dated number you can overwrite with your own scheme.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description, mainEntity: appId(tool.href), hasBreadcrumb: true, market: tool.market }),
+	softwareApplication({
+		name: tool.name,
+		path: tool.href,
+		description,
+		category: 'BusinessApplication',
+		features: tool.features,
+		keywords: tool.keywords,
+		market: tool.market,
+	}),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+
+const parties = [
+	{ key: 'buyer', legend: '1. Your company (buyer)', hint: 'The company raising and paying for this order.' },
+	{ key: 'vendor', legend: '2. Vendor (supplier)', hint: 'The company being asked to supply the goods.' },
+] as const;
+---
+
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">Procurement · Free · No sign-up</p>
+				<h1 class="mt-3 text-display text-ink">Purchase Order Generator</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Raise a purchase order your vendor can work from and your accounts payable team can match an invoice against. Line
+					items, tax and shipping, payment and FOB terms, and a running total as you type. The PDF is built on your device —
+					nothing is uploaded.
+				</p>
+			</div>
+			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Highlights">
+				<li class="chip">Free · no sign-up</li>
+				<li class="chip">Tax &amp; shipping</li>
+				<li class="chip">Payment &amp; FOB terms</li>
+				<li class="chip">Separate ship-to</li>
+				<li class="chip">Sign on screen</li>
+				<li class="chip">PDF or print</li>
+			</ul>
+		</div>
+	</section>
+
+	<!-- Tool -->
+	<section id="tool" class="bg-parchment" aria-labelledby="tool-heading">
+		<h2 id="tool-heading" class="sr-only">Purchase order generator</h2>
+		<div
+			class="mx-auto grid max-w-page gap-6 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:items-start"
+			data-po-tool
+			data-doc-tool
+		>
+			<!-- Form -->
+			<form class="card grid gap-8 p-5 sm:p-6" data-po-form novalidate autocomplete="on">
+				{
+					parties.map((party) => (
+						<fieldset class:list={['grid gap-4', party.key === 'vendor' && 'border-t border-hairline pt-6']}>
+							<legend class="float-left text-[1.0625rem] font-semibold text-ink">{party.legend}</legend>
+							<div class="clear-both">
+								<label for={`${party.key}-name`} class="field-label">
+									Company name
+								</label>
+								<input id={`${party.key}-name`} name={`${party.key}.name`} type="text" class="field" autocomplete="organization" />
+							</div>
+							<div>
+								<label for={`${party.key}-address`} class="field-label">
+									Street address
+								</label>
+								<textarea id={`${party.key}-address`} name={`${party.key}.address`} rows="2" class="field" autocomplete="street-address" />
+							</div>
+							<div class="grid gap-4 sm:grid-cols-[1.4fr_0.8fr_1fr]">
+								<div>
+									<label for={`${party.key}-city`} class="field-label">
+										City
+									</label>
+									<input id={`${party.key}-city`} name={`${party.key}.city`} type="text" class="field" autocomplete="address-level2" />
+								</div>
+								<div>
+									<label for={`${party.key}-state`} class="field-label">
+										State
+									</label>
+									<select id={`${party.key}-state`} name={`${party.key}.state`} class="field">
+										<option value="">—</option>
+										{US_STATES.map((s) => (
+											<option value={s.code}>{s.code}</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label for={`${party.key}-zip`} class="field-label">
+										ZIP
+									</label>
+									<input id={`${party.key}-zip`} name={`${party.key}.zip`} type="text" class="field tnum" maxlength="10" autocomplete="postal-code" />
+								</div>
+							</div>
+							<div class="grid gap-4 sm:grid-cols-2">
+								<div>
+									<label for={`${party.key}-contact`} class="field-label">
+										Contact <span class="font-normal text-ink-3">(optional)</span>
+									</label>
+									<input id={`${party.key}-contact`} name={`${party.key}.contact`} type="text" class="field" autocomplete="name" />
+								</div>
+								<div>
+									<label for={`${party.key}-phone`} class="field-label">
+										Phone <span class="font-normal text-ink-3">(optional)</span>
+									</label>
+									<input id={`${party.key}-phone`} name={`${party.key}.phone`} type="tel" class="field" autocomplete="tel" />
+								</div>
+								<div class="sm:col-span-2">
+									<label for={`${party.key}-email`} class="field-label">
+										Email <span class="font-normal text-ink-3">(optional)</span>
+									</label>
+									<input id={`${party.key}-email`} name={`${party.key}.email`} type="email" class="field" autocomplete="email" />
+								</div>
+							</div>
+							<p class="field-hint">{party.hint}</p>
+						</fieldset>
+					))
+				}
+
+				<!-- Ship to -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">3. Ship to</legend>
+					<label class="clear-both flex min-h-11 items-center gap-3 text-caption text-ink">
+						<input name="shipToSame" type="checkbox" class="checkbox" checked />
+						Ship to the buyer address above
+					</label>
+					<div class="grid gap-4 rounded-md border border-hairline bg-parchment p-4" data-ship-to hidden>
+						<div>
+							<label for="shipto-name" class="field-label">Company or location name</label>
+							<input id="shipto-name" name="shipTo.name" type="text" class="field" />
+						</div>
+						<div>
+							<label for="shipto-address" class="field-label">Street address</label>
+							<textarea id="shipto-address" name="shipTo.address" rows="2" class="field"></textarea>
+						</div>
+						<div class="grid gap-4 sm:grid-cols-[1.4fr_0.8fr_1fr]">
+							<div>
+								<label for="shipto-city" class="field-label">City</label>
+								<input id="shipto-city" name="shipTo.city" type="text" class="field" />
+							</div>
+							<div>
+								<label for="shipto-state" class="field-label">State</label>
+								<select id="shipto-state" name="shipTo.state" class="field">
+									<option value="">—</option>
+									{US_STATES.map((s) => <option value={s.code}>{s.code}</option>)}
+								</select>
+							</div>
+							<div>
+								<label for="shipto-zip" class="field-label">ZIP</label>
+								<input id="shipto-zip" name="shipTo.zip" type="text" class="field tnum" maxlength="10" />
+							</div>
+						</div>
+					</div>
+				</fieldset>
+
+				<!-- Order details -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">4. Order details</legend>
+					<div class="clear-both grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="po-number" class="field-label">PO number</label>
+							<input id="po-number" name="po.number" type="text" class="field tnum" spellcheck="false" autocomplete="off" />
+						</div>
+						<div>
+							<label for="po-date" class="field-label">PO date</label>
+							<input id="po-date" name="po.date" type="date" class="field tnum" />
+						</div>
+						<div>
+							<label for="po-required" class="field-label">Required by <span class="font-normal text-ink-3">(optional)</span></label>
+							<input id="po-required" name="po.requiredBy" type="date" class="field tnum" />
+						</div>
+						<div>
+							<label for="po-terms" class="field-label">Payment terms</label>
+							<select id="po-terms" name="po.terms" class="field">
+								{PAYMENT_TERMS.map((t) => <option value={t}>{t}</option>)}
+							</select>
+						</div>
+						<div>
+							<label for="po-fob" class="field-label">FOB terms</label>
+							<select id="po-fob" name="po.fob" class="field">
+								{FOB_TERMS.map((t) => <option value={t}>{t}</option>)}
+							</select>
+						</div>
+						<div>
+							<label for="po-ship" class="field-label">Ship method</label>
+							<select id="po-ship" name="po.shipMethod" class="field">
+								{SHIP_METHODS.map((t) => <option value={t}>{t}</option>)}
+							</select>
+						</div>
+					</div>
+					<p class="field-hint">
+						FOB decides who carries the loss if the freight is damaged in transit. FOB Destination keeps that risk with the vendor.
+					</p>
+				</fieldset>
+
+				<!-- Items -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">5. Items</legend>
+					<div class="clear-both grid gap-3" data-items></div>
+					<button type="button" data-add-item class="btn btn-ghost btn-sm justify-self-start">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+						Add item
+					</button>
+					<div class="grid gap-4 sm:grid-cols-3">
+						<div>
+							<label for="po-discount" class="field-label">Discount ($)</label>
+							<input id="po-discount" name="discount" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
+						</div>
+						<div>
+							<label for="po-tax" class="field-label">Tax rate (%)</label>
+							<input id="po-tax" name="taxRate" type="number" inputmode="decimal" min="0" max="100" step="0.001" class="field tnum" placeholder="0" />
+						</div>
+						<div>
+							<label for="po-shipping" class="field-label">Shipping ($)</label>
+							<input id="po-shipping" name="shipping" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum" placeholder="0.00" />
+						</div>
+					</div>
+					<p class="field-hint">
+						Tax is applied to the subtotal after discount, and shipping is added afterwards. Some states tax freight as well &mdash;
+						use the rate your accountant gives you.
+					</p>
+				</fieldset>
+
+				<!-- Notes -->
+				<fieldset class="grid gap-4 border-t border-hairline pt-6">
+					<legend class="float-left text-[1.0625rem] font-semibold text-ink">6. Notes &amp; authorization</legend>
+					<div class="clear-both">
+						<label for="po-notes" class="field-label">Notes to the vendor <span class="font-normal text-ink-3">(optional)</span></label>
+						<textarea id="po-notes" name="notes" rows="3" class="field"></textarea>
+					</div>
+					<div>
+						<label for="po-sign-title" class="field-label">Title <span class="font-normal text-ink-3">(optional)</span></label>
+						<input id="po-sign-title" name="sign.title" type="text" class="field" placeholder="Purchasing Manager" />
+					</div>
+					<div class="border-t border-hairline pt-5">
+						<p class="mb-3 text-caption text-ink-2">
+							Sign with a finger on a touchscreen, a stylus, or a mouse or trackpad. The ink is drawn straight onto the
+							purchase order and never leaves this device.
+						</p>
+						<SignaturePad
+							slotKey="authorized"
+							legend="Authorized signature"
+							typedName="sign.name"
+							typedLabel="Or type the authorizing name"
+							typedPlaceholder="e.g. Dana Whitfield"
+						/>
+					</div>
+					<div class="flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
+						<label class="flex min-h-11 items-center gap-3 text-caption text-ink">
+							<input name="keepDraft" type="checkbox" class="checkbox" checked />
+							Keep a draft in this browser
+						</label>
+						<button type="button" data-reset class="btn-quiet">Start over</button>
+					</div>
+				</fieldset>
+			</form>
+
+			<!-- Preview -->
+			<div class="grid gap-4 lg:sticky lg:top-20">
+				<div class="card overflow-hidden">
+					<div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 sm:px-5">
+						<h3 class="text-[1.0625rem] font-semibold">Document preview</h3>
+						<p class="tnum text-caption text-ink-2">Total <span class="font-semibold text-ink" data-doc="summary.total">$0.00</span></p>
+					</div>
+					<div id="doc-viewport" class="overflow-hidden bg-parchment p-3 sm:p-6">
+						<div id="doc-scaler" class="origin-top-left">
+							<!-- Letter-size document. Hex colours only: html2canvas cannot parse modern colour functions. -->
+							<div id="po-document" class="vd-doc">
+								<header class="vd-head vd-block">
+									<div>
+										<!-- Not a heading element: this is the rendered document's own title. -->
+										<p class="vd-title">Purchase Order</p>
+										<p class="vd-subtitle">This number must appear on all invoices, packing slips and correspondence.</p>
+										<p class="vd-issuer">
+											<strong data-doc="buyer.name"></strong>
+											<span class="vd-pre" data-doc="buyer.address"></span>
+										</p>
+									</div>
+									<table class="vd-meta">
+										<tbody>
+											<tr><th>PO No.</th><td data-doc="po.number"></td></tr>
+											<tr><th>Date</th><td data-doc="po.date"></td></tr>
+											<tr><th>Required by</th><td data-doc="po.requiredBy"></td></tr>
+											<tr><th>Terms</th><td data-doc="po.terms"></td></tr>
+										</tbody>
+									</table>
+								</header>
+
+								<section class="vd-parties vd-parties-2 vd-block">
+									<div class="vd-party">
+										<h4>Vendor</h4>
+										<p class="vd-name" data-doc="vendor.name"></p>
+										<p class="vd-pre" data-doc="vendor.address"></p>
+										<p data-doc="vendor.cityLine"></p>
+										<p data-doc="vendor.contact"></p>
+										<p data-doc="vendor.email"></p>
+									</div>
+									<div class="vd-party">
+										<h4>Ship to</h4>
+										<p class="vd-name" data-doc="shipTo.name"></p>
+										<p class="vd-pre" data-doc="shipTo.address"></p>
+										<p data-doc="shipTo.cityLine"></p>
+										<p data-doc="shipTo.contact"></p>
+									</div>
+								</section>
+
+								<section class="vd-strip vd-strip-3 vd-block">
+									<div class="vd-field"><h4>Payment terms</h4><p data-doc="po.terms"></p></div>
+									<div class="vd-field"><h4>FOB</h4><p data-doc="po.fob"></p></div>
+									<div class="vd-field"><h4>Ship method</h4><p data-doc="po.shipMethod"></p></div>
+								</section>
+
+								<table class="vd-items">
+									<caption>Items ordered</caption>
+									<thead>
+										<tr>
+											<th scope="col" class="vd-mid">#</th>
+											<th scope="col" class="vd-mid">SKU</th>
+											<th scope="col" class="vd-desc">Description</th>
+											<th scope="col" class="vd-num">Qty</th>
+											<th scope="col" class="vd-num">Unit price</th>
+											<th scope="col" class="vd-num">Amount</th>
+										</tr>
+									</thead>
+									<tbody data-doc-items></tbody>
+								</table>
+
+								<section class="vd-totals vd-block">
+									<table>
+										<tbody>
+											<tr><th>Subtotal</th><td data-doc="subtotal"></td></tr>
+											<tr data-doc-row="discount" hidden><th>Discount</th><td data-doc="discount"></td></tr>
+											<tr data-doc-row="tax" hidden><th data-doc="taxLabel">Tax</th><td data-doc="tax"></td></tr>
+											<tr data-doc-row="shipping" hidden><th>Shipping</th><td data-doc="shipping"></td></tr>
+											<tr class="vd-grand"><th>Total</th><td data-doc="total"></td></tr>
+										</tbody>
+									</table>
+								</section>
+
+								<section class="vd-section vd-block" data-doc-row="notes" hidden>
+									<h4>Notes</h4>
+									<p data-doc="notes"></p>
+								</section>
+
+								<div class="vd-spacer"></div>
+
+								<section class="vd-legal vd-block">
+									<h4>Terms</h4>
+									<p>
+										Acceptance of this order constitutes agreement to the prices, quantities and terms stated above. Any change to
+										price, quantity or delivery date must be agreed in writing before shipment. Invoices that do not quote this
+										purchase order number may be returned unpaid.
+									</p>
+								</section>
+
+								<section class="vd-signs vd-block">
+									<div class="vd-sign">
+										<div class="vd-sign-line">
+											<img data-doc-signature="authorized" alt="Authorized signature" hidden />
+											<span class="vd-sign-typed" data-doc-sign="authorized" hidden></span>
+										</div>
+										<h4>Authorized signature</h4>
+										<p data-doc="sign.title"></p>
+									</div>
+								</section>
+								<p class="vd-fine">Generated with {SITE.domain}. This is a template, not legal or tax advice.</p>
+							</div>
+						</div>
+					</div>
+					<div class="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-3 sm:px-5">
+						<button type="button" data-download-pdf class="btn btn-primary btn-sm">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"></path></svg>
+							Download PDF
+						</button>
+						<button type="button" data-print class="btn btn-ghost btn-sm">Print</button>
+						<p data-live class="ml-auto text-fine text-ink-2" role="status" aria-live="polite"></p>
+					</div>
+				</div>
+
+				<div class="card p-5 sm:p-6">
+					<p class="eyebrow">Readiness check</p>
+					<div
+						id="po-readiness"
+						class="mt-3 grid gap-2 text-caption [&>p]:rounded-md [&>p]:border [&>p]:px-3.5 [&>p]:py-2.5 [&>p[data-kind=ok]]:border-success/40 [&>p[data-kind=ok]]:text-success [&>p[data-kind=missing]]:border-hairline [&>p[data-kind=missing]]:text-ink-2 [&>p[data-kind=warn]]:border-danger/40 [&>p[data-kind=warn]]:text-danger"
+						aria-live="polite"
+					>
+					</div>
+				</div>
+			</div>
+
+			<!-- Mobile action bar (inside the tool root so the script can bind it) -->
+			<div
+				class="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-parchment/90 px-5 py-3 backdrop-blur-xl lg:hidden"
+				style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))"
+			>
+				<div class="mx-auto flex max-w-page items-center justify-between gap-4">
+					<p class="tnum text-caption text-ink-2">Total <span class="text-[1.0625rem] font-semibold text-ink" data-doc="summary.total">$0.00</span></p>
+					<button type="button" data-download-pdf class="btn btn-primary btn-sm">Download PDF</button>
+				</div>
+			</div>
+
+			<!-- Item row template -->
+			<template id="po-row-template">
+				<div data-item-row class="grid gap-2 rounded-md border border-hairline bg-parchment p-3">
+					<div class="flex items-center justify-between">
+						<span class="text-fine font-semibold text-ink-2">Item <span data-item-index>1</span></span>
+						<button
+							type="button"
+							data-remove-item
+							class="press -my-1 inline-flex min-h-9 items-center gap-1 rounded-full px-2.5 text-fine text-ink-2 hover:text-danger disabled:opacity-40"
+							aria-label="Remove item"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+							Remove
+						</button>
+					</div>
+					<div>
+						<label data-for="description" class="sr-only">Description</label>
+						<input data-item-field="description" type="text" class="field" placeholder="Description of goods or services" />
+					</div>
+					<div class="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_0.7fr_0.8fr_1fr]">
+						<div>
+							<label data-for="sku" class="text-fine text-ink-2">SKU / part</label>
+							<input data-item-field="sku" type="text" class="field tnum mt-1" placeholder="Optional" spellcheck="false" />
+						</div>
+						<div>
+							<label data-for="qty" class="text-fine text-ink-2">Qty</label>
+							<input data-item-field="qty" type="number" inputmode="decimal" min="0" step="any" class="field tnum mt-1" />
+						</div>
+						<div>
+							<label data-for="unit" class="text-fine text-ink-2">Unit</label>
+							<select data-item-field="unit" class="field mt-1">
+								{ITEM_UNITS.map((u) => <option value={u}>{u}</option>)}
+							</select>
+						</div>
+						<div>
+							<label data-for="unitPrice" class="text-fine text-ink-2">Unit price ($)</label>
+							<input data-item-field="unitPrice" type="number" inputmode="decimal" min="0" step="0.01" class="field tnum mt-1" placeholder="0.00" />
+						</div>
+					</div>
+					<p class="tnum text-right text-caption text-ink-2">Amount <span class="font-semibold text-ink" data-item-amount>$0.00</span></p>
+				</div>
+			</template>
+		</div>
+	</section>
+
+	<!-- Editorial -->
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<h2>What a purchase order is for</h2>
+				<p>
+					A purchase order is the buyer's half of a contract. You state what you want, how many, at what price and by when; the
+					vendor accepts, and both sides now have the same written record of the deal. Everything downstream depends on it — the
+					vendor ships against it, the warehouse receives against it, and accounts payable matches the invoice to it before
+					anyone releases money.
+				</p>
+				<p>
+					That three-way match — purchase order, receiving record, invoice — is the reason POs exist at all. Without one, an
+					invoice arrives and nobody can say whether the price is what was agreed, whether the quantity is what turned up, or
+					whether the order was authorized in the first place.
+				</p>
+
+				<h2>The fields that cause arguments</h2>
+				<p>
+					<strong>The PO number</strong> is what ties the whole chain together. Vendors quote it on the invoice, your AP system
+					matches on it, and many systems will not process an invoice without one.
+				</p>
+				<p>
+					<strong>FOB terms</strong> decide who owns the goods while they are on a truck. FOB Destination leaves the risk with the
+					vendor until delivery; FOB Origin transfers it to you the moment the carrier collects. If a pallet arrives crushed, this
+					one line decides whose loss it is.
+				</p>
+				<p>
+					<strong>Payment terms</strong> set when the money is due, and an early payment discount like 2/10 Net 30 is worth taking
+					seriously — 2% for paying twenty days early is a very high annualised return on cash.
+				</p>
+				<p>
+					<strong>The required-by date</strong> is the one vendors plan around. Leaving it blank invites whatever lead time suits
+					them.
+				</p>
+
+				<h2>When the order ships on a pallet</h2>
+				<p>
+					If what you are buying moves as LTL freight, the shipment needs a bill of lading, and the PO number belongs on it — that
+					is how the receiving dock knows which order has arrived. The <a href={BOL.href}>bill of lading generator</a> has a field
+					for exactly that. If you are the one arranging the freight, the <a href={FREIGHT_CLASS.href}>freight class calculator</a>
+					works out the class before you book.
+				</p>
+				<p class="callout">
+					This is a template, not legal or tax advice. Sales tax treatment varies by state and by what you are buying — check the
+					rate with your accountant, and have a lawyer review your standard terms before you rely on them.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Purchase order questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="po-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Shipping the order on a pallet?</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Create the bill of lading that travels with it, with your PO number and the freight class already on the document.
+				</p>
+			</div>
+			<a href={BOL.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the bill of lading generator</a>
+		</div>
+	</section>
+</Layout>
+
+<script>
+	import { initPurchaseOrderTool } from '../scripts/purchase-order';
+	const root = document.querySelector<HTMLElement>('[data-po-tool]');
+	if (root) initPurchaseOrderTool(root);
+</script>

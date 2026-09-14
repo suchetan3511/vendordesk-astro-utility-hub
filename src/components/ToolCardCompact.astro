@@ -1,0 +1,93 @@
+---
+import type { ArticleMeta, ToolMeta } from '../lib/site';
+
+interface Props {
+	tool: ToolMeta | ArticleMeta;
+	/** Articles get a quieter treatment than tools. */
+	kind?: 'tool' | 'article';
+	/** The lead tool in a group: larger type and a heavier icon, to hold the eye first. */
+	featured?: boolean;
+}
+
+const { tool, kind = 'tool', featured = false } = Astro.props;
+
+/**
+ * Small inline glyphs keyed by slug. Deliberately not separate art components: these sit at
+ * 20px in a dense grid, where the detail of the full illustrations would be lost anyway.
+ */
+const ICONS: Record<string, string> = {
+	'freight-class-calculator': 'M3 7h18M3 12h18M3 17h18M8 3v18',
+	'dimensional-weight-calculator': 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.3 7 12 12l8.7-5 M12 22V12',
+	'freight-class-chart': 'M3 3v18h18 M7 16V9 M12 16V5 M17 16v-4',
+	'nmfc-code-lookup': 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3',
+	'bill-of-lading-generator': 'M10 17h4V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12h3 M14 8h4l3 4v5h-2 M7.5 19.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M17.5 19.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+	'purchase-order-generator': 'M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M9 13l2 2 4-4',
+	'unregistered-vendor-bill-of-supply': 'M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2 M8 3h8v4H8z M8 12h8 M8 16h5',
+	'paper-bag-die-line-generator': 'M6 8h12l-1 12H7L6 8z M9 8V5a3 3 0 0 1 6 0v3',
+	'what-is-freight-class': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01',
+};
+
+const path = ICONS[tool.slug] ?? ICONS['what-is-freight-class'];
+---
+
+<a
+	href={tool.href}
+	class:list={[
+		'card group flex items-start gap-4 transition-[border-color,transform] duration-300 ease-(--ease-out-quart) hover:-translate-y-0.5 hover:border-hairline-strong active:scale-[0.99]',
+		featured ? 'p-6 sm:p-7' : 'p-5',
+	]}
+>
+	<span
+		class:list={[
+			'grid shrink-0 place-items-center rounded-md border border-hairline',
+			featured ? 'size-12' : 'size-10',
+			kind === 'article' ? 'bg-canvas text-ink-2' : 'bg-parchment text-primary',
+		]}
+		aria-hidden="true"
+	>
+		<svg
+			width={featured ? 24 : 20}
+			height={featured ? 24 : 20}
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.8"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			{path.split(' M').map((d, i) => <path d={i === 0 ? d : `M${d}`} />)}
+		</svg>
+	</span>
+
+	<span class="min-w-0 flex-1">
+		<span class="flex flex-wrap items-baseline gap-x-2">
+			<span class:list={['font-semibold text-ink', featured ? 'text-title' : 'text-[1.0625rem]']}>{tool.name}</span>
+			{kind === 'article' && <span class="text-fine text-ink-3">Guide</span>}
+		</span>
+		<span class:list={['mt-1 block text-ink-2', featured ? 'text-body' : 'text-caption']}>{tool.blurb}</span>
+		{
+			featured && 'features' in tool && (
+				<span class="mt-4 flex flex-wrap gap-2">
+					{tool.features.slice(0, 3).map((f) => (
+						<span class="chip">{f}</span>
+					))}
+				</span>
+			)
+		}
+	</span>
+
+	<svg
+		width="16"
+		height="16"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		aria-hidden="true"
+		class="mt-1 shrink-0 text-ink-3 transition-transform duration-300 ease-(--ease-out-quart) group-hover:translate-x-0.5 group-hover:text-primary"
+	>
+		<path d="M5 12h14M13 6l6 6-6 6"></path>
+	</svg>
+</a>

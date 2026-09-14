@@ -1,0 +1,237 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import DensityTable from '../components/DensityTable.astro';
+import { FREIGHT_CHART, FREIGHT_CLASS, NMFC_LOOKUP, WHAT_IS_CLASS } from '../lib/site';
+import { breadcrumb, faqPage, webPage } from '../lib/schema';
+import { LEGACY_DENSITY_CHART, NMFC_DENSITY_SCALE } from '../lib/freight';
+
+const tool = FREIGHT_CHART;
+const title = 'Freight Class Chart — 2025 NMFC Density Scale';
+const description =
+	'Complete freight class chart: the 2025 NMFC density scale, the legacy 18-class table and example commodities for every class from 50 to 500.';
+
+/**
+ * Example commodities per class. The density column is the legacy chart's band, labelled as such
+ * — the current density provision does not produce classes 77.5, 110, 150, 200 or 500 at all,
+ * so presenting those bands as current would contradict the rest of the page.
+ */
+const examples = [
+	{ cls: '50', band: '50 and above', density: true, goods: 'Bricks, cement, nuts and bolts, steel plate' },
+	{ cls: '55', band: '35 – 50', density: true, goods: 'Hardwood flooring, ceramic tile, molding' },
+	{ cls: '60', band: '30 – 35', density: true, goods: 'Car accessories, sheet metal parts, bottled drinks' },
+	{ cls: '65', band: '22.5 – 30', density: true, goods: 'Car parts, boxed books, bottled beverages' },
+	{ cls: '70', band: '15 – 22.5', density: true, goods: 'Car engines, food items, machinery parts' },
+	{ cls: '77.5', band: '13.5 – 15', density: false, goods: 'Tires, bathroom fixtures' },
+	{ cls: '85', band: '12 – 13.5', density: true, goods: 'Crated machinery, cast iron stoves' },
+	{ cls: '92.5', band: '10.5 – 12', density: true, goods: 'Computers, monitors, refrigerators' },
+	{ cls: '100', band: '9 – 10.5', density: true, goods: 'Boat covers, canvas, wine cases, caskets' },
+	{ cls: '110', band: '8 – 9', density: false, goods: 'Cabinets, framed artwork, table saws' },
+	{ cls: '125', band: '7 – 8', density: true, goods: 'Small household appliances' },
+	{ cls: '150', band: '6 – 7', density: false, goods: 'Auto sheet metal, bookcases' },
+	{ cls: '175', band: '5 – 6', density: true, goods: 'Clothing, couches, stuffed furniture' },
+	{ cls: '200', band: '4 – 5', density: false, goods: 'Sheet metal parts, aircraft parts, mattresses' },
+	{ cls: '250', band: '3 – 4', density: true, goods: 'Bamboo furniture, mattresses, plasma TVs' },
+	{ cls: '300', band: '2 – 3', density: true, goods: 'Wood cabinets, tables, chairs, model boats' },
+	{ cls: '400', band: '1 – 2', density: true, goods: 'Deer antlers, lightweight display racks' },
+	{ cls: '500', band: 'Under 1', density: false, goods: 'Ping-pong balls, gold dust, bags of feathers' },
+];
+
+const faqs = [
+	{
+		question: 'What is the freight class chart based on?',
+		answer:
+			'Density — pounds per cubic foot. The National Motor Freight Classification assigns a class from a density scale for most commodities. That scale was restructured by the NMFTA in Docket 2025-1, effective 19 July 2025, expanding it from eleven subprovisions to thirteen and adding classes 55 and 50 to the density scale.',
+	},
+	{
+		question: 'Why do some charts show 18 classes and others 13?',
+		answer:
+			'There are eighteen freight classes in the NMFC, but only thirteen of them are assigned by density. Classes 77.5, 110, 150, 200 and 500 come from specific commodity listings or from stowability, handling and liability characteristics. The widely published 18-row chart maps every class to a density band, which the density provision itself does not do.',
+	},
+	{
+		question: 'What is the lowest freight class?',
+		answer:
+			'Class 50, which carries the lowest rate. It applies to very dense freight of 50 pounds per cubic foot or more, such as bricks or steel plate. Class 50 was only added to the density scale by the 2025 restructuring.',
+	},
+	{
+		question: 'Can the same product have different freight classes?',
+		answer:
+			'Yes, for density-based commodities. Ship the same product in a different configuration or quantity and the density changes, so the class can change with it. Commodities with a fixed NMFC listing keep their class regardless of how they are packed.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: tool.href, description, hasBreadcrumb: true, market: tool.market }),
+	faqPage(faqs, tool.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: tool.name, path: tool.href },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema} lang={tool.market.lang} ogLocale={tool.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: tool.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">LTL reference · Free</p>
+				<h1 class="mt-3 text-display text-ink">Freight Class Chart</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Every NMFC freight class from 50 to 500, with the density band that produces it and the kind of goods that typically
+					rate there. Two charts are shown: the density provision as it stands after the NMFTA’s July 2025 restructuring,
+					and the older 18-class table that most sites still publish.
+				</p>
+			</div>
+			<p class="mt-6 text-fine text-ink-3">
+				Figures are indicative. Confirm classification with your carrier before booking.
+			</p>
+		</div>
+	</section>
+
+	<!-- The two scales -->
+	<section class="bg-parchment" aria-labelledby="scales-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-20">
+			<div class="max-w-prose">
+				<p class="eyebrow">Density to class</p>
+				<h2 id="scales-heading" class="mt-3 text-title text-ink">The two density charts, side by side</h2>
+				<p class="mt-4 text-body text-ink-2">
+					These agree at and above 15 pounds per cubic foot and diverge below it. The left-hand table is what a carrier rating
+					your freight on density today should return. The right-hand table is the one you will find on most freight sites, and
+					it is worth knowing which one a quote came from.
+				</p>
+			</div>
+
+			{/*
+			  `min-w-0` is load-bearing: a grid item defaults to `min-width: auto`, so it refuses to
+			  shrink below the widest thing inside it. The density tables carry `whitespace-nowrap`
+			  headers, which made the card wider than a 280px phone and scrolled the whole page
+			  sideways instead of scrolling the table inside its own container.
+			*/}
+			<div class="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-10">
+				<div class="card min-w-0 p-5 sm:p-6">
+					<h3 class="text-[1.0625rem] font-semibold text-ink">Current NMFC density scale</h3>
+					<p class="mt-1 text-fine text-ink-2">Thirteen subprovisions, effective 19 July 2025.</p>
+					<DensityTable
+						class="mt-4"
+						bands={NMFC_DENSITY_SCALE}
+						showSub
+						caption="Density in pounds per cubic foot and the class it rates."
+					/>
+				</div>
+				<div class="card min-w-0 p-5 sm:p-6">
+					<h3 class="text-[1.0625rem] font-semibold text-ink">Legacy 18-class chart</h3>
+					<p class="mt-1 text-fine text-ink-2">Superseded, but still widely published.</p>
+					<DensityTable class="mt-4" bands={LEGACY_DENSITY_CHART} caption="The older chart mapping all eighteen classes to a density band." />
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Examples -->
+	<section class="border-y border-hairline bg-canvas" aria-labelledby="examples-heading">
+		<div class="mx-auto max-w-page px-5 py-16 sm:px-8 sm:py-20">
+			<div class="max-w-prose">
+				<p class="eyebrow">By commodity</p>
+				<h2 id="examples-heading" class="mt-3 text-title text-ink">Example commodities by class</h2>
+				<p class="mt-4 text-body text-ink-2">
+					A rough orientation, not a classification. The density column shows the legacy chart’s band, because that is the
+					scale these commodity groupings were built against. Rows marked <em>listing</em> are classes the density provision does
+					not produce — goods rate there through a specific NMFC listing or through stowability, handling and liability.
+				</p>
+			</div>
+
+			<div class="mt-8 overflow-x-auto">
+				<table class="w-full border-collapse text-caption">
+					<caption class="mb-3 text-left text-fine text-ink-2">
+						Freight classes 50 to 500 with typical commodities and the legacy chart's density band.
+					</caption>
+					<thead>
+						<tr class="border-b border-hairline-strong">
+							<th scope="col" class="py-2.5 pr-4 text-left font-semibold whitespace-nowrap text-ink-2">Class</th>
+							<th scope="col" class="py-2.5 pr-4 text-left font-semibold whitespace-nowrap text-ink-2">Density band (legacy chart)</th>
+							<th scope="col" class="py-2.5 pr-4 text-left font-semibold whitespace-nowrap text-ink-2">Rated by</th>
+							<th scope="col" class="py-2.5 text-left font-semibold text-ink-2">Example commodities</th>
+						</tr>
+					</thead>
+					<tbody>
+						{
+							examples.map((row) => (
+								<tr class="border-b border-hairline last:border-b-0">
+									<th scope="row" class="tnum py-2.5 pr-4 text-left font-semibold text-ink">{row.cls}</th>
+									<td class="tnum py-2.5 pr-4 whitespace-nowrap text-ink-2">{row.band}</td>
+									<td class="py-2.5 pr-4 whitespace-nowrap text-ink-2">{row.density ? 'Density' : 'Listing'}</td>
+									<td class="py-2.5 text-ink-2">{row.goods}</td>
+								</tr>
+							))
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
+
+	<!-- Editorial -->
+	<section class="bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<div class="rich-text">
+				<h2>Which classes density can and cannot produce</h2>
+				<p>
+					There are eighteen freight classes. The density provision assigns thirteen of them. The remaining five —
+					<strong>77.5, 110, 150, 200 and 500</strong> — are real classes that real shipments rate at, but a density calculation
+					will never return them. Goods land there because the NMFC lists that commodity at that class, or because stowability,
+					handling or liability characteristics move it there.
+				</p>
+				<p>
+					This matters when you are checking a quote. If a carrier has rated your freight at class 110 and your own density
+					calculation says 100, that is not necessarily an error — it may be the listing rather than the density doing the work.
+					Equally, if a free calculator hands you class 150 for a 6.5 lb/ft³ pallet, it is using the legacy chart; the density
+					provision returns 125.
+				</p>
+
+				<h2>These examples are indicative</h2>
+				<p>
+					Commodity groupings like the table above circulate widely and are useful for orientation, but the actual NMFC listing
+					governs. Docket 2025-1 consolidated roughly 2,000 commodity listings in July 2025 and moved a large number of items onto
+					the density scale, so groupings assembled before that date can be out of step. If you have a classification you
+					established some years ago, verify it against the current publication rather than assuming it still applies.
+				</p>
+				<p>
+					Work out your own class with the <a href={FREIGHT_CLASS.href}>freight class calculator</a>, check whether your goods rate
+					on density with the <a href={NMFC_LOOKUP.href}>NMFC code lookup</a>, or read
+					<a href={WHAT_IS_CLASS.href}>how freight class is determined</a> for the background.
+				</p>
+				<p class="callout">
+					Figures are indicative. Confirm classification with your carrier before booking — a wrong class on the bill of lading is
+					the most common cause of an unexpected reclassification charge.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Chart questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="chart-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Know the density, skip the chart.</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Enter your dimensions and weight and get the class directly, with both scales compared for you.
+				</p>
+			</div>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the freight class calculator</a>
+		</div>
+	</section>
+</Layout>

@@ -1,0 +1,215 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import { DIM_WEIGHT, FREIGHT_CHART, FREIGHT_CLASS, NMFC_LOOKUP, WHAT_IS_CLASS } from '../lib/site';
+import { article, articleId, breadcrumb, faqPage, webPage } from '../lib/schema';
+
+const page = WHAT_IS_CLASS;
+const title = 'What Is Freight Class? 2025 NMFC Explained';
+const description =
+	'Freight class explained in plain English: what the NMFC is, the four factors that set your class, and how the 2025 restructuring changed the density scale.';
+
+const PUBLISHED = '2026-09-14';
+
+const faqs = [
+	{
+		question: 'Is freight class the same as NMFC code?',
+		answer:
+			'No. The NMFC code identifies the commodity; the freight class is the rating number derived from it. A single NMFC item can produce different classes depending on the density of the specific shipment.',
+	},
+	{
+		question: 'What is the cheapest freight class?',
+		answer:
+			'Class 50 carries the lowest rate. It applies to very dense freight of 50 pounds per cubic foot or more, such as bricks or steel. Class 50 only became reachable through the density scale with the July 2025 restructuring.',
+	},
+	{
+		question: 'Can freight class change between shipments?',
+		answer:
+			'Yes, for density-based commodities. If you ship the same product in a different configuration or quantity, the density changes and the class can change with it.',
+	},
+	{
+		question: 'Do I need an NMFC number on the bill of lading?',
+		answer:
+			'Most carriers ask for both the NMFC item number and the class. Providing both reduces the chance of a reclassification.',
+	},
+];
+
+const schema = [
+	webPage({ name: title, path: page.href, description, mainEntity: articleId(page.href), hasBreadcrumb: true, market: page.market }),
+	article({ name: 'What Is Freight Class?', path: page.href, description, datePublished: PUBLISHED, market: page.market }),
+	faqPage(faqs, page.href),
+	breadcrumb([
+		{ name: 'Home', path: '/' },
+		{ name: page.name, path: page.href },
+	]),
+];
+---
+
+<Layout title={title} description={description} schema={schema} lang={page.market.lang} ogLocale={page.market.ogLocale}>
+	<!-- Hero -->
+	<section class="border-b border-hairline bg-canvas">
+		<div class="mx-auto max-w-page px-5 pt-8 pb-10 sm:px-8 sm:pt-12 sm:pb-14">
+			<Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Tools', href: '/#tools' }, { name: page.shortName }]} />
+			<div class="mt-6 max-w-3xl">
+				<p class="eyebrow">Guide · LTL shipping</p>
+				<h1 class="mt-3 text-display text-ink">What Is Freight Class?</h1>
+				<p class="mt-4 text-lead text-ink-2">
+					Freight class is a standardized rating, from 50 to 500, that determines how much it costs to ship a pallet of goods on
+					an LTL — less-than-truckload — carrier. If you have ever been quoted one price for a shipment and invoiced a higher one
+					weeks later, freight class is almost always the reason.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Article -->
+	<section class="bg-canvas">
+		<div class="mx-auto max-w-prose px-5 py-14 sm:px-8 sm:py-20">
+			<div class="rich-text">
+				<h2>Who decides freight class</h2>
+				<p>
+					Freight classes come from the National Motor Freight Classification, or NMFC, a catalogue maintained by the National
+					Motor Freight Traffic Association. Nearly every LTL carrier in the United States prices against it. The NMFC lists
+					commodities and assigns each an item number and a class, so that a carrier in Ohio and a carrier in Nevada rate the same
+					pallet of goods the same way.
+				</p>
+				<p>
+					The system exists because LTL trailers are shared. When five customers’ freight travels in one truck, the carrier
+					needs a fair way to decide what share of the cost each shipment carries. Weight alone does not work — a pallet of
+					feathers and a pallet of steel weigh very differently, but a light, bulky pallet can consume more trailer space than a
+					heavy compact one. Classification solves that.
+				</p>
+
+				<h2>The four factors</h2>
+				<p>Four characteristics determine a commodity’s class.</p>
+				<p>
+					<strong>Density</strong> is weight relative to the space occupied, measured in pounds per cubic foot. It is the dominant
+					factor and, for a large and growing share of commodities, the only one that matters. Dense freight earns a low class and
+					a low rate.
+				</p>
+				<p>
+					<strong>Stowability</strong> is how well the freight loads alongside other freight. Items that are oddly shaped,
+					excessively long, hazardous, or that cannot be stacked take up space that cannot be sold to anyone else, and are rated
+					higher as a result.
+				</p>
+				<p>
+					<strong>Handling</strong> is the effort required to load and unload. Most freight moves by forklift without incident.
+					Freight that is fragile, unpackaged, awkwardly balanced or that requires special equipment costs the carrier more in
+					labor and time.
+				</p>
+				<p>
+					<strong>Liability</strong> is the risk the carrier absorbs. High-value goods, perishables, and anything prone to theft or
+					to damaging surrounding freight carry more risk, and therefore a higher class.
+				</p>
+
+				<h2>How density is calculated</h2>
+				<p>
+					Density is straightforward arithmetic. Multiply length by width by height in inches to get total cubic inches, then
+					divide by 1,728 to convert to cubic feet. Divide the shipment’s total weight in pounds by that cubic footage, and
+					the result is density in pounds per cubic foot.
+				</p>
+				<p>
+					A pallet measuring 48 by 40 by 48 inches occupies 92,160 cubic inches, or 53.3 cubic feet. If it weighs 700 pounds, its
+					density is 13.1 pounds per cubic foot, placing it in class 85. Our
+					<a href={FREIGHT_CLASS.href}>freight class calculator</a> does this for you and returns the class directly.
+				</p>
+				<p>
+					One detail catches people out constantly: measure the outside of the packaging, and include the pallet. Carriers measure
+					what they physically load. A 42-inch stack on a 6-inch pallet is a 48-inch shipment, and using 42 will produce a density
+					figure that does not match what the carrier records.
+				</p>
+
+				<h2>What the 2025 restructuring changed</h2>
+				<p>
+					The NMFC underwent the most significant overhaul in nearly ninety years in 2025. Docket 2025-1 took effect on 19 July
+					2025, consolidated roughly 2,000 commodity listings, and moved a large number of items onto density-based
+					classification.
+				</p>
+				<p>
+					It also changed the density scale itself. The scale expanded from eleven subprovisions to thirteen: the old top band of
+					“30 or greater” was split, and two new bands were added above it — 35 up to 50 pounds per cubic foot at class
+					55, and 50 or greater at class 50. Classes 50 and 55 had not previously been reachable through density at all, so very
+					dense freight can now rate lower, and more cheaply, than it could before.
+				</p>
+				<p>
+					This is worth knowing because most freight calculators and reference charts online still publish an older 18-row table
+					that maps every class to a density band. The density provision does not work that way: it assigns thirteen classes, and
+					five of the eighteen — 77.5, 110, 150, 200 and 500 — are never produced by density. The two versions agree at and above
+					15 pounds per cubic foot and diverge below it. The
+					<a href={FREIGHT_CHART.href}>full freight class chart</a> shows both side by side.
+				</p>
+				<p>
+					If you are working from a classification you established some years ago, verify it against the current publication
+					before assuming it still applies.
+				</p>
+
+				<h2>Why the class matters to your invoice</h2>
+				<p>
+					LTL rates are quoted per hundredweight against a class. The lower the class, the lower the rate. Moving a shipment from
+					class 175 down to class 100 can change the cost substantially — often by a third or more on the same lane.
+				</p>
+				<p>
+					This creates an obvious temptation to enter a lower class, and an equally obvious reason carriers guard against it. Most
+					terminals run dimensioning and weighing equipment that captures every pallet passing through. When the recorded figures
+					do not match the bill of lading, the shipment is reclassified, the invoice is corrected, and an inspection or
+					reclassification fee is usually added. Underclassing does not reduce cost; it defers and increases it.
+				</p>
+
+				<h2>Getting it right</h2>
+				<p>
+					Start by calculating density accurately, using real measured dimensions and the actual gross weight including packaging
+					and pallet. Check whether your commodity has a fixed NMFC listing rather than a density-based one — many do, and for
+					those the listed class governs regardless of what the density works out to. The
+					<a href={NMFC_LOOKUP.href}>NMFC code lookup</a> shows which common commodities rate on density and which carry a fixed
+					class. Keep a record of your classifications so repeat shipments are consistent. And if a commodity sits near a bracket
+					boundary, confirm with your carrier before booking rather than after.
+				</p>
+				<p>
+					When you have your dimensions to hand, the <a href={FREIGHT_CLASS.href}>freight class calculator</a> will give you the
+					density, the cubic footage and the class in one step.
+				</p>
+
+				<h2>Freight class and parcel shipping</h2>
+				<p>
+					Freight class applies to LTL pallet freight, not to parcel carriers. UPS, FedEx Ground and USPS use dimensional weight
+					instead — a related idea, in that both price bulky lightweight goods by the space they occupy, but a different
+					calculation. If you are shipping boxes rather than pallets, use the
+					<a href={DIM_WEIGHT.href}>dimensional weight calculator</a>.
+				</p>
+				<p>
+					Full truckload freight does not use classification either. When you buy the whole trailer, pricing is negotiated by lane
+					and the fairness problem classification solves does not arise.
+				</p>
+
+				<p class="callout">
+					Figures are indicative. Confirm classification with your carrier before booking.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="border-t border-hairline bg-parchment">
+		<div class="mx-auto max-w-prose px-5 py-16 sm:px-8 sm:py-24">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="mt-3 text-title text-ink">Common questions</h2>
+			<div class="mt-8">
+				<Faq items={faqs} name="what-is-faq" />
+			</div>
+		</div>
+	</section>
+
+	<!-- Cross-sell -->
+	<section class="bg-tile text-on-tile">
+		<div class="mx-auto flex max-w-page flex-col items-start gap-6 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:items-center md:justify-between">
+			<div class="max-w-xl">
+				<h2 class="text-title text-on-tile">Got your dimensions? Get the class.</h2>
+				<p class="mt-2 text-body text-on-tile-2">
+					Density, cubic feet and the NMFC class in one step — on the scale as it stands after the 2025 restructuring.
+				</p>
+			</div>
+			<a href={FREIGHT_CLASS.href} class="btn btn-primary w-full shrink-0 sm:w-auto">Open the freight class calculator</a>
+		</div>
+	</section>
+</Layout>

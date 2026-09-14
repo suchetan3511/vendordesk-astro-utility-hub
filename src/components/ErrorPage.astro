@@ -1,5 +1,5 @@
 ---
-import { NAV, TOOLS } from '../lib/site';
+import { ARTICLES, TOOLS } from '../lib/site';
 
 interface Props {
 	/** HTTP status, shown as the eyebrow. */
@@ -12,7 +12,10 @@ const { code, title, lead } = Astro.props;
 /** Every routable page, so a dead end still offers a way to everywhere else. */
 const allPages = [
 	{ href: '/', label: 'Home' },
-	...NAV.map((item) => ({ href: item.href, label: item.label })),
+	...TOOLS.map((t) => ({ href: t.href, label: t.name })),
+	...ARTICLES.map((a) => ({ href: a.href, label: a.name })),
+	{ href: '/about', label: 'About' },
+	{ href: '/contact', label: 'Contact' },
 	{ href: '/privacy-policy', label: 'Privacy Policy' },
 	{ href: '/terms-of-service', label: 'Terms of Service' },
 ];
