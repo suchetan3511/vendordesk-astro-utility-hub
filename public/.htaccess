@@ -16,10 +16,15 @@
 # Canonical host and scheme
 #
 # Without this, Hostinger answers on four hostnames with byte-identical HTML:
-# http/https × apex/www. Google treats those as four competing URLs and splits the
-# ranking signals between them. Each rule below lands on the canonical origin in a
-# SINGLE hop — http://www → https://apex directly, never http://www → https://www →
-# https://apex, because redirect chains leak PageRank and slow first paint.
+# http/https x apex/www. Google treats those as four competing URLs and splits the
+# ranking signals between them. Both rules below target https://apex directly, so a
+# request that reaches mod_rewrite is canonicalised in one hop.
+#
+# Measured 2026-09-15: http://www/<path> still takes two hops in practice, because
+# Hostinger's platform-level Force HTTPS redirect fires ahead of .htaccess and keeps
+# the www host (http://www -> https://www -> https://apex). Only that one entry point
+# is affected, it lands on the canonical either way, and HSTS means a browser skips
+# the http hop after its first visit - so it is left alone rather than fought with.
 # ---------------------------------------------------------------------------
 <IfModule mod_rewrite.c>
 	RewriteEngine On
